@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -y \
     libzip-dev \
     libicu-dev \
     libfreetype6-dev \
+    curl \
     git \
     unzip \
     mariadb-client \
