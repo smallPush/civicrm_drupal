@@ -25,7 +25,8 @@
         "drupal/core-recipe-unpack": "^11.3",
         "drupal/core-recommended": "^11.3",
         "drupal/webform": "^6.0",
-        "drupal/webform_civicrm": "^6.3"
+        "drupal/webform_civicrm": "^6.3",
+        "drush/drush": "^13.0"
     },
     "conflict": {
         "drupal/drupal": "*"

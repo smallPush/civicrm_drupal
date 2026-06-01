@@ -19,8 +19,10 @@ RUN apt-get update && apt-get install -y \
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) gd pdo pdo_mysql mysqli pdo_pgsql zip intl opcache bcmath
 
-# Enable Apache mod_rewrite
-RUN a2enmod rewrite
+# Enable Apache modules and set a default server name for container logs
+RUN a2enmod rewrite \
+    && printf 'ServerName localhost\n' > /etc/apache2/conf-available/servername.conf \
+    && a2enconf servername
 
 # Install Composer
 COPY --from=composer:2.7 /usr/bin/composer /usr/local/bin/composer
@@ -44,6 +46,8 @@ RUN composer config allow-plugins.cweagans/composer-patches true \
 COPY . .
 # Add default settings
 COPY settings.php /var/www/html/web/sites/default/settings.php
+# Static endpoint for Docker/Dokploy health checks that does not depend on Drupal bootstrap.
+RUN printf 'ok\n' > /var/www/html/web/healthz
 
 # Adjust permissions
 RUN chown -R www-data:www-data /var/www/html \
