@@ -35,6 +35,38 @@ Una vez que Drupal esté instalado:
 1. Dirígete a la interfaz de administración (Extend) y activa los módulos de CiviCRM.
 2. Completa los pasos de instalación que indique el asistente. La configuración de base de datos para CiviCRM apuntará al mismo servidor de MariaDB.
 
+### Eliminar CiviCRM si no se instaló correctamente
+
+Si la instalación de CiviCRM falla o queda incompleta, primero intenta desactivar los módulos desde Drupal.
+
+En local, ejecuta:
+
+```bash
+docker compose exec web ./vendor/bin/drush pm:uninstall -y webform_civicrm civicrm
+```
+
+En Dokploy, abre la terminal del contenedor `web` y ejecuta el mismo comando sin `docker compose exec web`:
+
+```bash
+./vendor/bin/drush pm:uninstall -y webform_civicrm civicrm
+```
+
+Si CiviCRM quedó a medio instalar y el comando anterior falla, haz una copia de seguridad de la base de datos y usa este comando de limpieza desde la terminal del contenedor `web` en Dokploy para quitar los módulos de la configuración activa de Drupal:
+
+```bash
+./vendor/bin/drush php:eval '$config = \Drupal::configFactory()->getEditable("core.extension"); foreach (["webform_civicrm", "civicrm"] as $module) { $config->clear("module.$module"); \Drupal::service("keyvalue")->get("system.schema")->delete($module); } $config->save();'
+./vendor/bin/drush cr
+```
+
+Si también quieres quitar CiviCRM del código del proyecto, elimina los paquetes de Composer y vuelve a construir la imagen localmente:
+
+```bash
+composer remove drupal/webform_civicrm civicrm/civicrm-drupal-8 civicrm/civicrm-core civicrm/civicrm-packages civicrm/civicrm-asset-plugin
+docker compose up -d --build
+```
+
+En Dokploy, no hagas `composer remove` directamente dentro del contenedor para un cambio permanente: el cambio se perderá al redeplegar. Haz el cambio en `composer.json`/`composer.lock`, súbelo al repositorio y redepliega la aplicación.
+
 ## Despliegue en Dokploy
 
 Este proyecto está optimizado para ser desplegado en **Dokploy** u otras plataformas basadas en Docker Compose.
