@@ -16,14 +16,14 @@
     ],
     "require": {
         "civicrm/civicrm-asset-plugin": "^1.2",
-        "civicrm/civicrm-core": "^6.14",
-        "civicrm/civicrm-drupal-8": "^6.14",
-        "civicrm/civicrm-packages": "^6.14",
+        "civicrm/civicrm-core": "^6.15",
+        "civicrm/civicrm-drupal-8": "^6.15",
+        "civicrm/civicrm-packages": "^6.15",
         "composer/installers": "^2.3",
         "drupal/core-composer-scaffold": "^11.3",
         "drupal/core-project-message": "^11.3",
         "drupal/core-recipe-unpack": "^11.3",
-        "drupal/core-recommended": "^11.3",
+        "drupal/core-recommended": "^11.4",
         "drupal/webform": "^6.0",
         "drupal/webform_civicrm": "^6.3",
         "drush/drush": "^13.0"
@@ -46,7 +46,8 @@
             "civicrm/civicrm-asset-plugin": true,
             "cweagans/composer-patches": true,
             "civicrm/composer-compile-plugin": true,
-            "civicrm/composer-downloads-plugin": true
+            "civicrm/composer-downloads-plugin": true,
+            "symfony/runtime": true
         },
         "sort-packages": true,
         "audit": {
