@@ -27,8 +27,8 @@ RUN a2enmod rewrite \
 # Install Composer
 COPY --from=composer:2.7 /usr/bin/composer /usr/local/bin/composer
 
-# Set default PHP memory limit for Drupal, CiviCRM, and Drush.
-RUN printf 'memory_limit = 512M\n' > /usr/local/etc/php/conf.d/memory-limit.ini
+# Set default PHP memory limit for Drupal, CiviCRM, and Drush to 512 mg as requested.
+RUN echo 'memory_limit = 512M' > /usr/local/etc/php/conf.d/memory-limit.ini
 
 # Set working directory
 WORKDIR /var/www/html
