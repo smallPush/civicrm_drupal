@@ -29,6 +29,14 @@ Este es un proyecto base configurado para ejecutar **Drupal 11** totalmente inte
 4. Accede a tu entorno en `http://localhost:8080`. Se abrirá la pantalla de instalación estándar de Drupal.
 5. Durante la instalación de Drupal, los parámetros de base de datos coinciden con los que configuraste en tu archivo `.env`.
 
+### Instalación en una Base de Datos Externa (vía Drush)
+
+Si deseas instalar Drupal utilizando una base de datos externa a través de la línea de comandos, puedes usar **Drush**. Ejecuta el siguiente comando (asegúrate de que las variables de entorno estén configuradas en tu archivo `.env`):
+
+```bash
+docker compose exec web ./vendor/bin/drush site:install standard --db-url="mysql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}/${DB_NAME}" --site-name="My Drupal Site" -y
+```
+
 ### Instalación de CiviCRM
 
 Una vez que Drupal esté instalado:
