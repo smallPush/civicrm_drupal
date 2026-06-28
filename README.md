@@ -75,6 +75,24 @@ docker compose up -d --build
 
 En Dokploy, no hagas `composer remove` directamente dentro del contenedor para un cambio permanente: el cambio se perderá al redeplegar. Haz el cambio en `composer.json`/`composer.lock`, súbelo al repositorio y redepliega la aplicación.
 
+
+
+## Persistencia y Configuración (Importante para Dokploy)
+
+Al desplegar en sistemas basados en contenedores efímeros (como Dokploy):
+
+*   **El contenedor web se recrea desde cero en cada deploy**, copiando los archivos definidos en la imagen (`Dockerfile`).
+*   **Cualquier cambio realizado en los archivos del contenedor y que no esté en un volumen de Docker, se perderá**.
+
+### Archivos de Configuración (`settings.php` y `civicrm.settings.php`)
+*   No debes editar estos archivos manualmente dentro del contenedor en el servidor de producción. Si lo haces, tus cambios se perderán en el próximo despliegue.
+*   La configuración debe provenir del repositorio de Git y de variables de entorno (almacenadas en Dokploy o en el `.env`).
+*   **`civicrm.settings.php`:** El archivo ya se ha incluido en el código fuente de la aplicación basándose en variables de entorno para las credenciales de BD. Esto asegura que la configuración sobreviva a los redespliegues. Puedes ajustar las variables en tu `.env` o en Dokploy (ej. `CIVICRM_SITE_KEY`, `CIVICRM_DB_HOST`, etc).
+
+### Volúmenes (Archivos Subidos)
+*   La ruta `/var/www/html/web/sites/default/files` está persistida usando el volumen `drupal_data` en el `docker-compose.yml`. Todos los archivos públicos subidos por los usuarios, directorios `civicrm/templates_c`, `civicrm/ConfigAndLog`, etc., vivirán aquí y **NO se perderán**.
+*   Si configuras un sistema de **archivos privados** (por ejemplo en `sites/default/files/private`), asegúrate de que esa ruta caiga dentro del volumen persistido.
+
 ## Despliegue en Dokploy
 
 Este proyecto está optimizado para ser desplegado en **Dokploy** u otras plataformas basadas en Docker Compose.

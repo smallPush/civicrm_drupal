@@ -49,6 +49,7 @@ RUN composer config allow-plugins.cweagans/composer-patches true \
 COPY . .
 # Add default settings
 COPY settings.php /var/www/html/web/sites/default/settings.php
+COPY civicrm.settings.php /var/www/html/web/sites/default/civicrm.settings.php
 # Static endpoint for Docker/Dokploy health checks that does not depend on Drupal bootstrap.
 RUN printf 'ok\n' > /var/www/html/web/healthz
 
