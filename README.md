@@ -75,6 +75,24 @@ docker compose up -d --build
 
 En Dokploy, no hagas `composer remove` directamente dentro del contenedor para un cambio permanente: el cambio se perderá al redeplegar. Haz el cambio en `composer.json`/`composer.lock`, súbelo al repositorio y redepliega la aplicación.
 
+
+
+## Persistencia y Configuración (Importante para Dokploy)
+
+Al desplegar en sistemas basados en contenedores efímeros (como Dokploy):
+
+*   **El contenedor web se recrea desde cero en cada deploy**, copiando los archivos definidos en la imagen (`Dockerfile`).
+*   **Cualquier cambio realizado en los archivos del contenedor y que no esté en un volumen de Docker, se perderá**.
+
+### Archivos de Configuración (`settings.php` y `civicrm.settings.php`)
+*   No debes editar estos archivos manualmente dentro del contenedor en el servidor de producción. Si lo haces, tus cambios se perderán en el próximo despliegue.
+*   La configuración debe provenir del repositorio de Git y de variables de entorno (almacenadas en Dokploy o en el `.env`).
+*   **`civicrm.settings.php`:** El archivo ya se ha incluido en el código fuente de la aplicación basándose en variables de entorno para las credenciales de BD. Esto asegura que la configuración sobreviva a los redespliegues. Puedes ajustar las variables en tu `.env` o en Dokploy (ej. `CIVICRM_SITE_KEY`, `CIVICRM_DB_HOST`, etc).
+
+### Volúmenes (Archivos Subidos)
+*   La ruta `/var/www/html/web/sites/default/files` está persistida usando el volumen `drupal_data` en el `docker-compose.yml`. Todos los archivos públicos subidos por los usuarios, directorios `civicrm/templates_c`, `civicrm/ConfigAndLog`, etc., vivirán aquí y **NO se perderán**.
+*   El sistema de **archivos privados** (configurado en `sites/default/files/private`) **tampoco se eliminará ni perderá datos**, ya que reside dentro del mismo directorio `files/` que está siendo persistido por el volumen `drupal_data`.
+
 ## Despliegue en Dokploy
 
 Este proyecto está optimizado para ser desplegado en **Dokploy** u otras plataformas basadas en Docker Compose.
@@ -88,7 +106,15 @@ Este proyecto está optimizado para ser desplegado en **Dokploy** u otras plataf
    - Conecta el repositorio Git de este proyecto.
 3. **Variables de Entorno**:
    - Ve a la pestaña **Environment Variables**.
-   - Configura allí todas las variables presentes en el `.env.example` (`DB_ROOT_PASSWORD`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`, `DRUPAL_HASH_SALT`).
+   - Configura allí todas las variables presentes en el `.env.example`:
+     - `PORT`: (Opcional) Puerto interno, por defecto 8080.
+     - `DB_ROOT_PASSWORD`: Contraseña root de MariaDB.
+     - `DB_USER`: Usuario de la base de datos para Drupal y CiviCRM.
+     - `DB_PASSWORD`: Contraseña del usuario de la base de datos.
+     - `DB_NAME`: Nombre de la base de datos principal.
+     - `DRUPAL_HASH_SALT`: Hash aleatorio y seguro para encriptación en Drupal.
+     - `CIVICRM_SITE_KEY`: (Requerido para CiviCRM) Clave de sitio segura.
+     - Variables adicionales de BD de CiviCRM si utilizas bases separadas (`CIVICRM_DB_HOST`, `CIVICRM_DB_USER`, `CIVICRM_DB_PASSWORD`, `CIVICRM_DB_NAME`).
 4. **Desplegar**:
    - Haz clic en **Deploy**. Dokploy leerá el `docker-compose.yml` e iniciará los contenedores de `web` y `db`, creando automáticamente la red interna.
    - Los directorios `/var/www/html/web/sites/default/files` y `/var/lib/mysql` utilizarán los volúmenes configurados para persistir información (archivos subidos y base de datos) aunque se reinicien los contenedores.
