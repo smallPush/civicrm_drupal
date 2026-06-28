@@ -91,7 +91,7 @@ Al desplegar en sistemas basados en contenedores efímeros (como Dokploy):
 
 ### Volúmenes (Archivos Subidos)
 *   La ruta `/var/www/html/web/sites/default/files` está persistida usando el volumen `drupal_data` en el `docker-compose.yml`. Todos los archivos públicos subidos por los usuarios, directorios `civicrm/templates_c`, `civicrm/ConfigAndLog`, etc., vivirán aquí y **NO se perderán**.
-*   Si configuras un sistema de **archivos privados** (por ejemplo en `sites/default/files/private`), asegúrate de que esa ruta caiga dentro del volumen persistido.
+*   El sistema de **archivos privados** (configurado en `sites/default/files/private`) **tampoco se eliminará ni perderá datos**, ya que reside dentro del mismo directorio `files/` que está siendo persistido por el volumen `drupal_data`.
 
 ## Despliegue en Dokploy
 
@@ -106,7 +106,15 @@ Este proyecto está optimizado para ser desplegado en **Dokploy** u otras plataf
    - Conecta el repositorio Git de este proyecto.
 3. **Variables de Entorno**:
    - Ve a la pestaña **Environment Variables**.
-   - Configura allí todas las variables presentes en el `.env.example` (`DB_ROOT_PASSWORD`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`, `DRUPAL_HASH_SALT`).
+   - Configura allí todas las variables presentes en el `.env.example`:
+     - `PORT`: (Opcional) Puerto interno, por defecto 8080.
+     - `DB_ROOT_PASSWORD`: Contraseña root de MariaDB.
+     - `DB_USER`: Usuario de la base de datos para Drupal y CiviCRM.
+     - `DB_PASSWORD`: Contraseña del usuario de la base de datos.
+     - `DB_NAME`: Nombre de la base de datos principal.
+     - `DRUPAL_HASH_SALT`: Hash aleatorio y seguro para encriptación en Drupal.
+     - `CIVICRM_SITE_KEY`: (Requerido para CiviCRM) Clave de sitio segura.
+     - Variables adicionales de BD de CiviCRM si utilizas bases separadas (`CIVICRM_DB_HOST`, `CIVICRM_DB_USER`, `CIVICRM_DB_PASSWORD`, `CIVICRM_DB_NAME`).
 4. **Desplegar**:
    - Haz clic en **Deploy**. Dokploy leerá el `docker-compose.yml` e iniciará los contenedores de `web` y `db`, creando automáticamente la red interna.
    - Los directorios `/var/www/html/web/sites/default/files` y `/var/lib/mysql` utilizarán los volúmenes configurados para persistir información (archivos subidos y base de datos) aunque se reinicien los contenedores.
