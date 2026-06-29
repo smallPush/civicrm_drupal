@@ -1,0 +1,11 @@
+--- a/CRM/Utils/File.php
++++ b/CRM/Utils/File.php
+@@ -533,7 +533,7 @@
+   public static function getFilesByExtension($path, $ext) {
+     $path = self::addTrailingSlash($path);
+     $files = [];
+-    if ($dh = opendir($path)) {
++    if ($dh = @opendir($path)) {
+       while (FALSE !== ($elem = readdir($dh))) {
+         if (substr($elem, -(strlen($ext) + 1)) == '.' . $ext) {
+           $files[] = $path . $elem;
