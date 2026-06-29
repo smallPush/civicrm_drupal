@@ -24,3 +24,15 @@ $civicrm_paths['civicrm.root']['url'] = '/libraries/civicrm/';
 if (!defined('CIVICRM_TEMPLATE_COMPILEDIR')) {
   define('CIVICRM_TEMPLATE_COMPILEDIR', '/var/www/html/web/sites/default/files/civicrm/templates_c/');
 }
+
+$include_path = '.'           . PATH_SEPARATOR .
+                $civicrm_root . PATH_SEPARATOR .
+                $civicrm_root . DIRECTORY_SEPARATOR . 'packages' . PATH_SEPARATOR .
+                get_include_path();
+if (set_include_path($include_path) === false) {
+   echo "Could not set the include path<p>";
+   exit();
+}
+
+require_once 'CRM/Core/ClassLoader.php';
+CRM_Core_ClassLoader::singleton()->register();
