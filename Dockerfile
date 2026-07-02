@@ -33,8 +33,9 @@ RUN echo 'memory_limit = 512M' > /usr/local/etc/php/conf.d/memory-limit.ini
 # Set working directory
 WORKDIR /var/www/html
 
-# Copy composer files
-COPY composer.json ./
+# Copy dependency metadata and patches before install so Docker builds are reproducible.
+COPY composer.json composer.lock ./
+COPY patches ./patches
 
 # Allow CiviCRM composer plugins and install dependencies
 RUN composer config allow-plugins.cweagans/composer-patches true \
