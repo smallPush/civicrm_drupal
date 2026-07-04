@@ -26,7 +26,7 @@ Este es un proyecto base configurado para ejecutar **Drupal 11** totalmente inte
    ```bash
    docker compose up -d --build
    ```
-4. Accede a tu entorno en `http://localhost:8080`. Se abrirá la pantalla de instalación estándar de Drupal.
+4. Accede a tu entorno en `http://localhost:8080`. Si necesitas cambiar el puerto local, ajusta `HOST_PORT` en `.env`. Se abrirá la pantalla de instalación estándar de Drupal.
 5. Durante la instalación de Drupal, los parámetros de base de datos coinciden con los que configuraste en tu archivo `.env`.
 
 ### Instalación en una Base de Datos Externa (vía Drush)
@@ -107,7 +107,7 @@ Este proyecto está optimizado para ser desplegado en **Dokploy** u otras plataf
 3. **Variables de Entorno**:
    - Ve a la pestaña **Environment Variables**.
    - Configura allí todas las variables presentes en el `.env.example`:
-     - `PORT`: (Opcional) Puerto interno, por defecto 8080.
+     - `HOST_PORT`: (Opcional, solo para acceso directo/local) Puerto publicado en el host, por defecto 8080. No es el puerto interno del contenedor.
      - `DB_ROOT_PASSWORD`: Contraseña root de MariaDB.
      - `DB_USER`: Usuario de la base de datos para Drupal y CiviCRM.
      - `DB_PASSWORD`: Contraseña del usuario de la base de datos.
@@ -117,6 +117,7 @@ Este proyecto está optimizado para ser desplegado en **Dokploy** u otras plataf
      - Variables adicionales de BD de CiviCRM si utilizas bases separadas (`CIVICRM_DB_HOST`, `CIVICRM_DB_USER`, `CIVICRM_DB_PASSWORD`, `CIVICRM_DB_NAME`).
 4. **Desplegar**:
    - Haz clic en **Deploy**. Dokploy leerá el `docker-compose.yml` e iniciará los contenedores de `web` y `db`, creando automáticamente la red interna.
+   - En la configuración de dominio/proxy de Dokploy, apunta el dominio al servicio `web` usando el puerto interno `80`. No uses `8080` como puerto del contenedor; `8080` solo es el puerto publicado localmente por defecto.
    - Los directorios `/var/www/html/web/sites/default/files` y `/var/lib/mysql` utilizarán los volúmenes configurados para persistir información (archivos subidos y base de datos) aunque se reinicien los contenedores.
 5. **Comprobación (Health Checks)**:
    - Dokploy podrá monitorizar la salud de ambos contenedores, ya que `docker-compose.yml` expone sus respectivos `healthcheck`.
