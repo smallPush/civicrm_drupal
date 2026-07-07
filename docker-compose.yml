@@ -20,6 +20,9 @@ services:
       - DRUPAL_HASH_SALT=${DRUPAL_HASH_SALT}
     volumes:
       - drupal_data:/var/www/html/web/sites/default/files
+    networks:
+      - default
+      - dokploy-network
     depends_on:
       db:
         condition: service_healthy
@@ -50,3 +53,7 @@ services:
 volumes:
   drupal_data:
   db_data:
+
+networks:
+  dokploy-network:
+    external: true
