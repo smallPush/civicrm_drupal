@@ -114,6 +114,7 @@ Este proyecto está optimizado para ser desplegado en **Dokploy** u otras plataf
      - `DB_NAME`: Nombre de la base de datos principal.
      - `DRUPAL_HASH_SALT`: Hash aleatorio y seguro para encriptación en Drupal.
      - `CIVICRM_SITE_KEY`: (Requerido para CiviCRM) Clave de sitio segura.
+     - `CIVICRM_UF_BASEURL`: (Opcional recomendado en producción) URL pública del sitio, por ejemplo `https://tu-dominio.example/`.
      - Variables adicionales de BD de CiviCRM si utilizas bases separadas (`CIVICRM_DB_HOST`, `CIVICRM_DB_USER`, `CIVICRM_DB_PASSWORD`, `CIVICRM_DB_NAME`).
 4. **Desplegar**:
    - Haz clic en **Deploy**. Dokploy leerá el `docker-compose.yml` e iniciará los contenedores de `web` y `db`, creando automáticamente la red interna.

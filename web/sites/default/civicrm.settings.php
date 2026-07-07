@@ -5,7 +5,14 @@
  */
 define('CIVICRM_UF', 'Drupal8');
 if (!defined('CIVICRM_UF_BASEURL')) {
-  define('CIVICRM_UF_BASEURL', getenv('CIVICRM_UF_BASEURL') ?: 'http://localhost/');
+  $civicrm_base_url = getenv('CIVICRM_UF_BASEURL');
+  if (!$civicrm_base_url && !empty($_SERVER['HTTP_HOST'])) {
+    $forwarded_proto = $_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '';
+    $https = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
+    $scheme = $forwarded_proto ? strtok($forwarded_proto, ',') : ($https ? 'https' : 'http');
+    $civicrm_base_url = $scheme . '://' . $_SERVER['HTTP_HOST'] . '/';
+  }
+  define('CIVICRM_UF_BASEURL', $civicrm_base_url ?: 'http://localhost/');
 }
 $civicrm_root = '/var/www/html/vendor/civicrm/civicrm-core/';
 
