@@ -5,7 +5,7 @@ $databases['default']['default'] = [
   'username' => getenv('DB_USER') ?: 'drupal',
   'password' => getenv('DB_PASSWORD') ?: 'drupalpassword',
   'host' => getenv('DB_HOST') ?: 'db',
-  'port' => '3306',
+  'port' => getenv('DB_PORT') ?: '3306',
   'namespace' => 'Drupal\\Core\\Database\\Driver\\mysql',
   'driver' => 'mysql',
 ];
@@ -19,4 +19,3 @@ $settings['file_private_path'] = 'sites/default/files/private';
 $settings['file_temp_path'] = '/tmp';
 
 $settings['config_sync_directory'] = 'sites/default/files/config_sync';
-
