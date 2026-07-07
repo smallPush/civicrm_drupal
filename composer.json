@@ -8,6 +8,9 @@
     "docs": "https://www.drupal.org/docs/user_guide/en/index.html",
     "chat": "https://www.drupal.org/node/314178"
   },
+  "scripts": {
+    "test:docker": "bash tests/docker/validate.sh"
+  },
   "repositories": [
     {
       "type": "composer",

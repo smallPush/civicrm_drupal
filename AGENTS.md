@@ -9,6 +9,7 @@
 ## Commands
 - First local setup: `cp .env.example .env`, then edit `.env` values, especially `DRUPAL_HASH_SALT`.
 - Full local build/run: `docker compose up -d --build`.
+- Focused Docker validation test: `composer test:docker`.
 - Validate Compose without starting services: `docker compose --env-file .env.example config` when no local `.env` exists.
 - Check running services: `docker compose ps`.
 - Follow app logs: `docker compose logs -f web`; database logs: `docker compose logs -f db`.
@@ -36,6 +37,7 @@
 
 ## Verification Notes
 - No CI workflow, PHPUnit config, PHPCS config, PHPStan config, or task runner is present in the repo.
+- `composer test:docker` validates Compose with `.env.example` and builds the `web` image.
 - For infrastructure-only changes, use `docker compose --env-file .env.example config` as the focused check.
 - For Dockerfile, Composer, patches, or runtime config changes, prefer `docker compose --env-file .env.example build web`; use `docker compose up -d --build` and `docker compose ps` when runtime smoke testing is needed.
 - When adding custom code, default to TDD, but first add an explicit test runner/config because none exists yet.
