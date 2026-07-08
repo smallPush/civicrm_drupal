@@ -14,6 +14,7 @@ if (!defined('CIVICRM_UF_BASEURL')) {
   }
   define('CIVICRM_UF_BASEURL', $civicrm_base_url ?: 'http://localhost/');
 }
+global $civicrm_root;
 $civicrm_root = '/var/www/html/vendor/civicrm/civicrm-core/';
 
 $civicrm_db_user = getenv('CIVICRM_DB_USER') ?: getenv('DB_USER');
@@ -26,11 +27,15 @@ define('CIVICRM_DSN', "mysql://{$civicrm_db_user}:{$civicrm_db_password}@{$civic
 define('CIVICRM_UF_DSN', "mysql://{$civicrm_db_user}:{$civicrm_db_password}@{$civicrm_db_host}:{$civicrm_db_port}/{$civicrm_db_name}?new_link=true");
 
 define('CIVICRM_SITE_KEY', getenv('CIVICRM_SITE_KEY') ?: 'CHANGE_ME_TO_SOMETHING_SECURE');
+if (!defined('CIVICRM_DOMAIN_ID')) {
+  define('CIVICRM_DOMAIN_ID', (int) (getenv('CIVICRM_DOMAIN_ID') ?: 1));
+}
 
 $civicrm_setting['core']['civicrm_env'] = 'Production';
 
 global $civicrm_paths;
-$civicrm_paths['civicrm.root']['url'] = '/libraries/civicrm/';
+$civicrm_paths['civicrm.root']['url'] = '/libraries/civicrm/core/';
+$civicrm_paths['civicrm.packages']['url'] = '/libraries/civicrm/packages/';
 
 if (!defined('CIVICRM_TEMPLATE_COMPILEDIR')) {
   define('CIVICRM_TEMPLATE_COMPILEDIR', '/var/www/html/web/sites/default/files/civicrm/templates_c/');
