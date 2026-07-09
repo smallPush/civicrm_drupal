@@ -125,6 +125,10 @@ Este proyecto está optimizado para ser desplegado en **Dokploy** u otras plataf
 
 ## Actualización y Mantenimiento
 
+Notas operativas recientes:
+
+- [CRM Smallpush Performance Notes](docs/crm-smallpush-performance-notes.md)
+
 Para actualizar Drupal o CiviCRM:
 
 1. Modifica la versión de los paquetes en el `composer.json` localmente.
