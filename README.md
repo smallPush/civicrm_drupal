@@ -15,6 +15,18 @@ Este es un proyecto base configurado para ejecutar **Drupal 11** totalmente inte
 - Docker y Docker Compose
 - Composer (opcional para desarrollo local fuera del contenedor)
 
+## Ramas y pruebas
+
+- `develop`: rama de integración. Cada `push` y cada pull request dirigido a esta rama ejecuta `composer test:docker` en GitHub Actions.
+- `production`: rama estable para despliegues de producción. Promueve cambios desde `develop` mediante pull request después de que las pruebas pasen.
+- `main`: rama histórica del repositorio; los nuevos cambios deben seguir el flujo `develop` a `production`.
+
+Antes de subir cambios a `develop`, ejecuta localmente:
+
+```bash
+composer test:docker
+```
+
 ## Configuración e Instalación Local
 
 1. Copia el archivo `.env.example` a `.env`:

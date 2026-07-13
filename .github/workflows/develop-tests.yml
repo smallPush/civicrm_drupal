@@ -1,0 +1,28 @@
+name: Develop tests
+
+on:
+  push:
+    branches:
+      - develop
+  pull_request:
+    branches:
+      - develop
+
+permissions:
+  contents: read
+
+concurrency:
+  group: develop-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  docker:
+    name: Validate and build Docker image
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Run Docker tests
+        run: composer test:docker
