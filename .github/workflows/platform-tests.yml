@@ -1,12 +1,16 @@
-name: Develop tests
+name: Platform tests
 
 on:
   push:
     branches:
       - develop
+      - production
+    tags:
+      - "v*-drupal*-civicrm*"
   pull_request:
     branches:
       - develop
+      - production
 
 permissions:
   contents: read
@@ -23,6 +27,13 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v5
+
+      - name: Verify release versions
+        run: composer test:versions
+
+      - name: Verify release tag
+        if: github.ref_type == 'tag'
+        run: php scripts/release-version.php --check-tag "${GITHUB_REF_NAME}"
 
       - name: Run Docker tests
         run: composer test:docker
