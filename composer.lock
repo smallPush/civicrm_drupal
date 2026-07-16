@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8e40f264b996b2be1db7a486ecf30220",
+    "content-hash": "5735a9d7b3c340f7efb32270fa05b034",
     "packages": [
         {
             "name": "adrienrn/php-mimetyper",
@@ -7680,6 +7680,31 @@
             "time": "2025-02-07T04:55:46+00:00"
         },
         {
+            "name": "smallpush/smallpush-ui",
+            "version": "dev-main",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/smallPush/smallpush-ui.git",
+                "reference": "71c2135f93085edad2a45cffc412874abb824871"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/smallPush/smallpush-ui/zipball/71c2135f93085edad2a45cffc412874abb824871",
+                "reference": "71c2135f93085edad2a45cffc412874abb824871",
+                "shasum": ""
+            },
+            "require": {
+                "drupal/core": "^11"
+            },
+            "default-branch": true,
+            "type": "drupal-custom-theme",
+            "license": [
+                "GPL-2.0-or-later"
+            ],
+            "description": "Modern, accessible Drupal theme for SmallPush CiviCRM projects.",
+            "time": "2026-07-16T22:21:00+00:00"
+        },
+        {
             "name": "soundasleep/html2text",
             "version": "2.1.0",
             "source": {
@@ -11841,10 +11866,12 @@
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {},
+    "stability-flags": {
+        "smallpush/smallpush-ui": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
-    "platform": {},
-    "platform-dev": {},
-    "plugin-api-version": "2.9.0"
+    "platform": [],
+    "platform-dev": [],
+    "plugin-api-version": "2.6.0"
 }

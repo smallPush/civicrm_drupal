@@ -1,6 +1,9 @@
 services:
   web:
-    build: .
+    build:
+      context: .
+      secrets:
+        - github_token
     restart: always
     ports:
       - "${HOST_PORT:-8080}:80"
@@ -50,3 +53,7 @@ services:
 volumes:
   drupal_data:
   db_data:
+
+secrets:
+  github_token:
+    environment: SMALLPUSH_UI_TOKEN
