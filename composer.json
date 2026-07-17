@@ -130,6 +130,9 @@
     "patches": {
       "civicrm/civicrm-core": {
         "Suppress opendir warnings": "patches/civicrm-core-opendir.patch"
+      },
+      "smallpush/smallpush-ui": {
+        "Fix default logo and improve header navigation": "patches/smallpush-ui-header.patch"
       }
     }
   }
