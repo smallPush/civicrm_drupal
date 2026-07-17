@@ -17,6 +17,11 @@
     {
       "type": "composer",
       "url": "https://packages.drupal.org/8"
+    },
+    {
+      "type": "vcs",
+      "url": "https://github.com/smallPush/smallpush-ui.git",
+      "no-api": true
     }
   ],
   "require": {
@@ -33,7 +38,8 @@
     "drupal/smtp": "^1.4",
     "drupal/webform": "^6.0",
     "drupal/webform_civicrm": "^6.3",
-    "drush/drush": "^13.0"
+    "drush/drush": "^13.0",
+    "smallpush/smallpush-ui": "dev-main"
   },
   "conflict": {
     "drupal/drupal": "*"
@@ -124,6 +130,9 @@
     "patches": {
       "civicrm/civicrm-core": {
         "Suppress opendir warnings": "patches/civicrm-core-opendir.patch"
+      },
+      "smallpush/smallpush-ui": {
+        "Fix default logo and improve header navigation": "patches/smallpush-ui-header.patch"
       }
     }
   }

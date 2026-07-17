@@ -1,0 +1,109 @@
+diff --git a/logo.svg b/logo.svg
+new file mode 100644
+index 0000000..dd38129
+--- /dev/null
++++ b/logo.svg
+@@ -0,0 +1,6 @@
++<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100" role="img" aria-labelledby="title">
++  <title id="title">SmallPush</title>
++  <rect x="25" y="60" width="50" height="30" fill="#bc8154" stroke="#734a39" stroke-width="2"/>
++  <rect x="30" y="35" width="40" height="25" fill="#c08456" stroke="#734a39" stroke-width="2"/>
++  <rect x="40" y="10" width="30" height="25" fill="#d2a27c" stroke="#734a39" stroke-width="2" transform="rotate(-5 55 22.5)"/>
++</svg>
+diff --git a/css/components.css b/css/components.css
+index 7e0fcf0..edb7af7 100644
+--- a/css/components.css
++++ b/css/components.css
+@@ -364,3 +364,89 @@ textarea {
+     animation-iteration-count: 1 !important;
+   }
+ }
++
++.site-header .block {
++  margin: 0;
++}
++
++.site-header .block-system-powered-by-block {
++  display: none;
++}
++
++.site-header .block-system-branding-block {
++  display: flex;
++  align-items: center;
++  gap: var(--sp-space-2);
++  min-width: 0;
++}
++
++.site-header .site-logo {
++  flex: 0 0 auto;
++  border-radius: var(--sp-radius-md);
++  text-decoration: none;
++}
++
++.site-header .site-logo img {
++  width: 2.75rem;
++  height: 2.75rem;
++}
++
++.site-header .site-name {
++  overflow: hidden;
++  font-family: var(--sp-font-display);
++  font-size: var(--sp-size-lg);
++  font-weight: 750;
++  line-height: 1;
++  text-overflow: ellipsis;
++  white-space: nowrap;
++}
++
++.site-header .site-name a {
++  color: var(--sp-color-surface);
++  text-decoration: none;
++}
++
++.site-header .menu a {
++  padding: 0.55rem 0.75rem;
++  border-radius: var(--sp-radius-sm);
++}
++
++.site-header .menu a:hover,
++.site-header .menu a.is-active {
++  background: rgb(255 255 255 / 8%);
++}
++
++.site-header__actions .menu a {
++  border: 1px solid var(--sp-color-accent);
++  background: var(--sp-color-accent);
++  color: var(--sp-color-ink);
++}
++
++.site-header__actions .menu a:hover,
++.site-header__actions .menu a.is-active {
++  background: var(--sp-color-surface);
++  color: var(--sp-color-ink);
++}
++
++.site-highlighted .menu {
++  display: flex;
++  flex-wrap: wrap;
++  gap: var(--sp-space-1) var(--sp-space-3);
++  margin: 0;
++  padding: 0;
++  list-style: none;
++}
++
++.site-highlighted .block:last-child,
++.site-highlighted .menu:last-child {
++  margin-bottom: 0;
++}
++
++@media (max-width: 35rem) {
++  .site-header__inner {
++    grid-template-columns: minmax(0, 1fr);
++  }
++
++  .site-header__navigation,
++  .site-header__actions {
++    grid-column: 1;
++    justify-self: stretch;
++  }
++}

@@ -7,5 +7,7 @@ web/libraries/
 web/sites/*/files/
 web/sites/*/settings.local.php
 .env
+/smallpush-ui/
+/web/themes/custom/smallpush-ui/
 /.editorconfig
 /.gitattributes

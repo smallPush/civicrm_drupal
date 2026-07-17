@@ -37,3 +37,5 @@ jobs:
 
       - name: Run Docker tests
         run: composer test:docker
+        env:
+          SMALLPUSH_UI_TOKEN: ${{ secrets.SMALLPUSH_UI_TOKEN }}
