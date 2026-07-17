@@ -1,0 +1,10 @@
+.git
+.env
+smallpush-ui
+vendor
+web/core
+web/libraries
+web/modules/contrib
+web/profiles/contrib
+web/sites/default/files
+web/themes/contrib

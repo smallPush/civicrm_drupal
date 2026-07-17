@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 FROM php:8.3-apache
 
 # Install required packages and PHP extensions for Drupal and CiviCRM
@@ -37,8 +38,11 @@ WORKDIR /var/www/html
 COPY composer.json composer.lock ./
 COPY patches ./patches
 
-# Allow CiviCRM composer plugins and install dependencies
-RUN composer config allow-plugins.cweagans/composer-patches true \
+# Allow CiviCRM composer plugins and install dependencies. The GitHub token is
+# mounted only for this step and is not persisted in an image layer.
+RUN --mount=type=secret,id=github_token,required=true \
+    export COMPOSER_AUTH="$(php -r '$token = trim(file_get_contents("/run/secrets/github_token")); echo json_encode(["github-oauth" => ["github.com" => $token]]);')" \
+    && composer config allow-plugins.cweagans/composer-patches true \
     && composer config allow-plugins.civicrm/composer-compile-plugin true \
     && composer config allow-plugins.civicrm/composer-downloads-plugin true \
     && composer config allow-plugins.civicrm/civicrm-asset-plugin true \
