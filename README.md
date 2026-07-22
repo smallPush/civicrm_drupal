@@ -58,6 +58,25 @@ Una vez que Drupal esté instalado:
 1. Dirígete a la interfaz de administración (Extend) y activa los módulos de CiviCRM.
 2. Completa los pasos de instalación que indique el asistente. La configuración de base de datos para CiviCRM apuntará al mismo servidor de MariaDB.
 
+### Perfil de instalación seguro y despliegue del theme `smallpush_ui`
+
+El contenedor web ejecuta un script de inicio (`docker-entrypoint.sh`) que verifica automáticamente si el sitio está instalado. En el próximo despliegue o primer arranque, si la base de datos está vacía, se ejecuta automáticamente la instalación del perfil **`civicrm_secure`** y se establece el theme **`smallpush_ui`** como predeterminado:
+
+- **Instalación automática en arranque**: Si el sitio no está instalado, el contenedor ejecuta automáticamente `drush site:install civicrm_secure`.
+- **Instalación manual vía Drush** (si se requiere ejecutar manualmente):
+
+```bash
+docker compose exec web ./vendor/bin/drush site:install civicrm_secure --uri=http://localhost:8080 --site-name="My Drupal Site" -y
+```
+
+Si el sitio ya está instalado y solo se desea habilitar y activar el theme `smallpush_ui` manualmente vía Drush:
+
+```bash
+docker compose exec web ./vendor/bin/drush theme:enable smallpush_ui -y
+docker compose exec web ./vendor/bin/drush config:set system.theme default smallpush_ui -y
+```
+
+Ajusta el puerto de `--uri` si `HOST_PORT` no es `8080`. El perfil habilita los módulos y el theme `smallpush_ui`, pero TFA, las políticas de contraseña y las cabeceras de Security Kit deben configurarse después de la instalación para no bloquear el acceso inicial ni romper recursos de CiviCRM.
 ### Eliminar CiviCRM si no se instaló correctamente
 
 Si la instalación de CiviCRM falla o queda incompleta, primero intenta desactivar los módulos desde Drupal.
