@@ -1,0 +1,19 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the civicrm_secure profile.
+ */
+
+/**
+ * Implements hook_install().
+ *
+ * Perform actions to set default frontend theme to smallpush_ui.
+ */
+function civicrm_secure_install(): void {
+  // Set default frontend theme to smallpush_ui.
+  \Drupal::configFactory()
+    ->getEditable('system.theme')
+    ->set('default', 'smallpush_ui')
+    ->save();
+}
