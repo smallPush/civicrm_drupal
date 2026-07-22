@@ -107,3 +107,14 @@ index 7e0fcf0..edb7af7 100644
 +    justify-self: stretch;
 +  }
 +}
+diff --git a/smallpush_ui.libraries.yml b/smallpush_ui.libraries.yml
+index 3df4bed..6f775b2 100644
+--- a/smallpush_ui.libraries.yml
++++ b/smallpush_ui.libraries.yml
+@@ -1,5 +1,5 @@
+ global:
+-  version: VERSION
++  version: 1.1.0
+   css:
+     theme:
+       css/tokens.css: { weight: -20 }
