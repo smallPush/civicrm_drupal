@@ -1,10 +1,11 @@
 # AGENTS.md
 
 ## Project Shape
-- This is a Drupal 11 + CiviCRM base project, not a custom app with source modules checked in yet.
+- This is a Drupal 11 + CiviCRM base project with the `civicrm_secure` custom profile and the `smallpush_ui` theme required via Composer.
 - The public document root is `web/`; Composer/Drupal scaffold generates most of it, so commit only intentional custom code/config there.
 - Root `settings.php` and `civicrm.settings.php` are deployment templates; the Docker build copies them to `web/sites/default/`.
 - Docker Compose runs two services: `web` from the local `Dockerfile` and `db` from `mariadb:10.11`.
+
 
 ## Commands
 - First local setup: `cp .env.example .env`, then edit `.env` values, especially `DRUPAL_HASH_SALT`.
@@ -29,6 +30,7 @@
 - Apache serves `/var/www/html/web`; do not change paths assuming `/var/www/html` is the document root.
 - `web/sites/default/files` is the persisted upload/private/config-sync area via the `drupal_data` volume.
 - `web/healthz` is a static Docker/Dokploy health endpoint; it must not depend on Drupal bootstrap.
+- Dokploy recreates containers from Git. Production container entrypoint (`docker-entrypoint.sh`) automatically installs site baseline via `civicrm_secure` profile and sets `smallpush_ui` as default theme if uninstalled. Permanent dependency/config changes belong in repository files and environment variables, never manual container edits.
 
 ## Dokploy Notes
 - Dokploy deploys from Git and recreates the web container; do not make permanent Composer/config edits inside the running container.
