@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "f824c950b2d87e728c724542a8cd7377",
+    "content-hash": "8bcfbea5d3cc0c4237ef1e27f575d6ab",
     "packages": [
         {
             "name": "adrienrn/php-mimetyper",
@@ -7681,28 +7681,27 @@
         },
         {
             "name": "smallpush/smallpush-ui",
-            "version": "dev-main",
+            "version": "v1.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/smallPush/smallpush-ui.git",
-                "reference": "71c2135f93085edad2a45cffc412874abb824871"
+                "reference": "d9f93c9af79fc16435eee2362b72f164975ee7cd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/smallPush/smallpush-ui/zipball/71c2135f93085edad2a45cffc412874abb824871",
-                "reference": "71c2135f93085edad2a45cffc412874abb824871",
+                "url": "https://api.github.com/repos/smallPush/smallpush-ui/zipball/d9f93c9af79fc16435eee2362b72f164975ee7cd",
+                "reference": "d9f93c9af79fc16435eee2362b72f164975ee7cd",
                 "shasum": ""
             },
             "require": {
                 "drupal/core": "^11"
             },
-            "default-branch": true,
             "type": "drupal-custom-theme",
             "license": [
                 "GPL-2.0-or-later"
             ],
             "description": "Modern, accessible Drupal theme for SmallPush CiviCRM projects.",
-            "time": "2026-07-16T22:21:00+00:00"
+            "time": "2026-07-24T12:12:05+00:00"
         },
         {
             "name": "soundasleep/html2text",
@@ -11866,12 +11865,10 @@
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {
-        "smallpush/smallpush-ui": 20
-    },
+    "stability-flags": {},
     "prefer-stable": true,
     "prefer-lowest": false,
-    "platform": [],
-    "platform-dev": [],
-    "plugin-api-version": "2.6.0"
+    "platform": {},
+    "platform-dev": {},
+    "plugin-api-version": "2.9.0"
 }
