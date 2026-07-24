@@ -39,7 +39,7 @@
     "drupal/webform": "^6.0",
     "drupal/webform_civicrm": "^6.3",
     "drush/drush": "^13.0",
-    "smallpush/smallpush-ui": "dev-main"
+    "smallpush/smallpush-ui": "^1.0"
   },
   "conflict": {
     "drupal/drupal": "*"
