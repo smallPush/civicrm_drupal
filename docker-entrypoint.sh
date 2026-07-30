@@ -1,6 +1,13 @@
 #!/usr/bin/env bash
 set -e
 
+FILES_DIR="web/sites/default/files"
+chown -R www-data:www-data "$FILES_DIR"
+
+drush() {
+  runuser -u www-data -- ./vendor/bin/drush "$@"
+}
+
 # Wait for database connection if DB_HOST and DB_USER are set
 if [ -n "${DB_HOST:-}" ] && [ -n "${DB_USER:-}" ]; then
   echo "Checking database connection to ${DB_HOST}:${DB_PORT:-3306}..."
@@ -18,11 +25,11 @@ if [ -n "${DB_HOST:-}" ] && [ -n "${DB_USER:-}" ]; then
 fi
 
 # Check if Drupal site is installed
-BOOTSTRAP_STATUS="$(./vendor/bin/drush status --field=bootstrap 2>/dev/null || true)"
+BOOTSTRAP_STATUS="$(drush status --field=bootstrap 2>/dev/null || true)"
 
 if [[ "$BOOTSTRAP_STATUS" != *"Successful"* ]]; then
   echo "Drupal site is not installed. Launching automatic installation with civicrm_secure profile..."
-  ./vendor/bin/drush site:install civicrm_secure \
+  drush site:install civicrm_secure \
     --uri="${CIVICRM_UF_BASEURL:-http://localhost:8080}" \
     --site-name="${SITE_NAME:-My Drupal Site}" \
     --account-name="${ADMIN_USER:-admin}" \
@@ -30,7 +37,7 @@ if [[ "$BOOTSTRAP_STATUS" != *"Successful"* ]]; then
     -y
 else
   echo "Drupal site is already installed. Rebuilding cache..."
-  ./vendor/bin/drush cr || true
+  drush cr || true
 fi
 
 exec "$@"
