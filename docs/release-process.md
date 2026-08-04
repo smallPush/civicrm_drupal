@@ -39,16 +39,16 @@ Any Drupal or CiviCRM update must include `composer.json`, `composer.lock`, and 
 
 ## Tags
 
-Production releases use annotated, immutable tags with all three versions:
+Production releases use annotated, immutable tags with clean semantic versions:
 
 ```text
-v<project>-drupal<drupal>-civicrm<civicrm>
+v<project>
 ```
 
 Example:
 
 ```text
-v1.0.0-drupal11.4.0-rc2-civicrm6.15.5
+v1.3.0
 ```
 
 Create a release only from the tested commit on `production`:

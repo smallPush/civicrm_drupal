@@ -6,7 +6,7 @@ on:
       - develop
       - production
     tags:
-      - "v*-drupal*-civicrm*"
+      - "v*"
   pull_request:
     branches:
       - develop

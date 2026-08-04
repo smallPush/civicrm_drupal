@@ -56,12 +56,7 @@ foreach ($expectedPackages as $package => $expectedVersion) {
     }
 }
 
-$tag = sprintf(
-    'v%s-drupal%s-civicrm%s',
-    $release['project'],
-    $release['drupal'],
-    $release['civicrm'],
-);
+$tag = sprintf('v%s', $release['project']);
 
 if (($argv[1] ?? null) === '--check-tag') {
     $actualTag = $argv[2] ?? '';
