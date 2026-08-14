@@ -21,6 +21,7 @@ services:
       - CIVICRM_DB_PASSWORD=${CIVICRM_DB_PASSWORD:-${DB_PASSWORD}}
       - CIVICRM_DB_NAME=${CIVICRM_DB_NAME:-${DB_NAME}}
       - DRUPAL_HASH_SALT=${DRUPAL_HASH_SALT}
+      - DRUPAL_PAGE_CACHE_MAX_AGE=${DRUPAL_PAGE_CACHE_MAX_AGE:-900}
     volumes:
       - drupal_data:/var/www/html/web/sites/default/files
     depends_on:
@@ -36,6 +37,12 @@ services:
   db:
     image: mariadb:10.11
     restart: always
+    command:
+      - --innodb-buffer-pool-size=512M
+      - --tmp-table-size=64M
+      - --max-heap-table-size=64M
+      - --slow-query-log=ON
+      - --long-query-time=2
     environment:
       - MARIADB_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
       - MARIADB_USER=${DB_USER}

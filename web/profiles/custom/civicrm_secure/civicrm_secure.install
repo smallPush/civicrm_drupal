@@ -16,4 +16,15 @@ function civicrm_secure_install(): void {
     ->getEditable('system.theme')
     ->set('default', 'smallpush_ui')
     ->save();
+
+  // Configure performance settings.
+  $page_cache_max_age = getenv('DRUPAL_PAGE_CACHE_MAX_AGE');
+  $max_age = ($page_cache_max_age !== false && $page_cache_max_age !== '') ? (int) $page_cache_max_age : 900;
+
+  \Drupal::configFactory()
+    ->getEditable('system.performance')
+    ->set('cache.page.max_age', $max_age)
+    ->set('css.preprocess', TRUE)
+    ->set('js.preprocess', TRUE)
+    ->save();
 }

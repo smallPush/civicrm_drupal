@@ -1,11 +1,20 @@
 #!/usr/bin/env bash
 set -e
 
-FILES_DIR="web/sites/default/files"
+FILES_DIR="/var/www/html/web/sites/default/files"
+mkdir -p "$FILES_DIR" \
+         "$FILES_DIR/civicrm/templates_c" \
+         "$FILES_DIR/civicrm/upload" \
+         "$FILES_DIR/civicrm/custom" \
+         "$FILES_DIR/civicrm/ConfigAndLog" \
+         "$FILES_DIR/private" \
+         "$FILES_DIR/config_sync"
+
 chown -R www-data:www-data "$FILES_DIR"
+chmod -R u+rwX,g+rwX "$FILES_DIR"
 
 drush() {
-  runuser -u www-data -- ./vendor/bin/drush "$@"
+  runuser -u www-data -- /var/www/html/vendor/bin/drush "$@"
 }
 
 # Wait for database connection if DB_HOST and DB_USER are set
@@ -24,6 +33,8 @@ if [ -n "${DB_HOST:-}" ] && [ -n "${DB_USER:-}" ]; then
   fi
 fi
 
+PAGE_CACHE_MAX_AGE="${DRUPAL_PAGE_CACHE_MAX_AGE:-900}"
+
 # Check if Drupal site is installed
 BOOTSTRAP_STATUS="$(drush status --field=bootstrap 2>/dev/null || true)"
 
@@ -35,9 +46,25 @@ if [[ "$BOOTSTRAP_STATUS" != *"Successful"* ]]; then
     --account-name="${ADMIN_USER:-admin}" \
     --account-pass="${ADMIN_PASSWORD:-admin}" \
     -y
+  echo "Applying performance settings to fresh installation (page_cache_max_age=${PAGE_CACHE_MAX_AGE}, css/js preprocess=1)..."
+  drush cset system.performance cache.page.max_age "${PAGE_CACHE_MAX_AGE}" -y || true
+  drush cset system.performance css.preprocess 1 -y || true
+  drush cset system.performance js.preprocess 1 -y || true
+  echo "Rebuilding cache..."
+  drush cr || true
 else
-  echo "Drupal site is already installed. Rebuilding cache..."
+  echo "Drupal site is already installed."
+  echo "Applying performance settings to existing installation (page_cache_max_age=${PAGE_CACHE_MAX_AGE}, css/js preprocess=1)..."
+  drush cset system.performance cache.page.max_age "${PAGE_CACHE_MAX_AGE}" -y || true
+  drush cset system.performance css.preprocess 1 -y || true
+  drush cset system.performance js.preprocess 1 -y || true
+  echo "Rebuilding cache on deployment..."
   drush cr || true
 fi
+
+# Ensure CiviCRM directory permissions after cache rebuild
+mkdir -p "$FILES_DIR/civicrm/templates_c"
+chown -R www-data:www-data "$FILES_DIR/civicrm"
+chmod -R u+rwX,g+rwX "$FILES_DIR/civicrm"
 
 exec "$@"
