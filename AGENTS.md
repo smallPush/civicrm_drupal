@@ -30,11 +30,13 @@
 - Apache serves `/var/www/html/web`; do not change paths assuming `/var/www/html` is the document root.
 - `web/sites/default/files` is the persisted upload/private/config-sync area via the `drupal_data` volume.
 - `web/healthz` is a static Docker/Dokploy health endpoint; it must not depend on Drupal bootstrap.
-- Dokploy recreates containers from Git. Production container entrypoint (`docker-entrypoint.sh`) automatically installs site baseline via `civicrm_secure` profile and sets `smallpush_ui` as default theme if uninstalled. Permanent dependency/config changes belong in repository files and environment variables, never manual container edits.
+- Production performance tuning: Drupal page cache configurable via `DRUPAL_PAGE_CACHE_MAX_AGE` (default 900s), CSS/JS preprocessing enabled, PHP OPcache enabled with 256MB memory and `validate_timestamps=0`, Apache static asset cache headers enabled (`mod_expires`, `mod_headers`), Composer autoloader optimized, and MariaDB tuned with persistent buffer/table sizing.
+- Dokploy recreates containers from Git. Production container entrypoint (`docker-entrypoint.sh`) automatically installs site baseline via `civicrm_secure` profile and sets `smallpush_ui` as default theme if uninstalled, applies performance configuration to new and existing sites, and executes mandatory `drush cr` on startup. Permanent dependency/config changes belong in repository files and environment variables, never manual container edits.
 
 ## Dokploy Notes
 - Dokploy deploys from Git and recreates the web container; do not make permanent Composer/config edits inside the running container.
 - Production configuration should come from repo files plus Dokploy environment variables, not from manual edits under `web/sites/default/` in the container.
+- Containers should be restarted on deployment because `opcache.validate_timestamps=0` is enabled in production.
 - For a failed CiviCRM install, README has the exact Drush uninstall/cleanup commands; back up the database before using the php:eval cleanup.
 
 ## Verification Notes

@@ -19,3 +19,9 @@ $settings['file_private_path'] = 'sites/default/files/private';
 $settings['file_temp_path'] = '/tmp';
 
 $settings['config_sync_directory'] = 'sites/default/files/config_sync';
+
+// Performance configuration overrides
+$page_cache_max_age = getenv('DRUPAL_PAGE_CACHE_MAX_AGE');
+$config['system.performance']['cache']['page']['max_age'] = ($page_cache_max_age !== false && $page_cache_max_age !== '') ? (int) $page_cache_max_age : 900;
+$config['system.performance']['css']['preprocess'] = TRUE;
+$config['system.performance']['js']['preprocess'] = TRUE;
