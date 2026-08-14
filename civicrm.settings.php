@@ -33,6 +33,14 @@ if (!defined('CIVICRM_DOMAIN_ID')) {
 
 $civicrm_setting['core']['civicrm_env'] = 'Production';
 
+global $civicrm_setting;
+if (empty($civicrm_setting['Directory Preferences']['extensionsDir'])) {
+  $civicrm_setting['Directory Preferences']['extensionsDir'] = getenv('CIVICRM_SETTING_EXTENSIONS_DIR') ?: '/var/www/html/web/ext/';
+}
+if (empty($civicrm_setting['URL Preferences']['extensionsURL'])) {
+  $civicrm_setting['URL Preferences']['extensionsURL'] = getenv('CIVICRM_SETTING_EXTENSIONS_URL') ?: '/ext/';
+}
+
 global $civicrm_paths;
 $civicrm_paths['civicrm.root']['url'] = '/libraries/civicrm/core/';
 $civicrm_paths['civicrm.packages']['url'] = '/libraries/civicrm/packages/';

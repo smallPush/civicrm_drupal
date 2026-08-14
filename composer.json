@@ -15,13 +15,23 @@
     {
       "type": "composer",
       "url": "https://packages.drupal.org/8"
+    },
+    {
+      "type": "vcs",
+      "url": "https://lab.civicrm.org/extensions/action-provider.git"
+    },
+    {
+      "type": "vcs",
+      "url": "https://lab.civicrm.org/extensions/form-processor.git"
     }
   ],
   "require": {
+    "civicrm/action-provider": "^1.201",
     "civicrm/civicrm-asset-plugin": "^1.2",
     "civicrm/civicrm-core": "^6.15",
     "civicrm/civicrm-drupal-8": "^6.15",
     "civicrm/civicrm-packages": "^6.15",
+    "civicrm/form-processor": "^3.3",
     "composer/installers": "^2.3",
     "cweagans/composer-patches": "^1.7",
     "drupal/core-composer-scaffold": "^11.3",
@@ -96,6 +106,9 @@
       ],
       "recipes/{$name}": [
         "type:drupal-recipe"
+      ],
+      "web/ext/{$name}": [
+        "type:civicrm-ext"
       ]
     },
     "drupal-core-project-message": {
