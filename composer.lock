@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8bcfbea5d3cc0c4237ef1e27f575d6ab",
+    "content-hash": "91a939002a44f8c5c4b8767640e711c3",
     "packages": [
         {
             "name": "adrienrn/php-mimetyper",
@@ -346,6 +346,21 @@
                 "source": "https://github.com/Chi-teck/drupal-code-generator/tree/4.2.0"
             },
             "time": "2025-06-01T13:48:30+00:00"
+        },
+        {
+            "name": "civicrm/action-provider",
+            "version": "1.201",
+            "source": {
+                "type": "git",
+                "url": "https://lab.civicrm.org/extensions/action-provider.git",
+                "reference": "d3aee096cd36b9ee9761f66980efa696cdfa1755"
+            },
+            "require": {
+                "ext-json": "*"
+            },
+            "type": "civicrm-ext",
+            "description": "Action Provider",
+            "time": "2026-07-22T14:42:22+00:00"
         },
         {
             "name": "civicrm/civicrm-asset-plugin",
@@ -1163,6 +1178,18 @@
                 "source": "https://github.com/civicrm/composer-downloads-plugin/tree/v4.0.0"
             },
             "time": "2024-04-09T20:34:36+00:00"
+        },
+        {
+            "name": "civicrm/form-processor",
+            "version": "3.3.2",
+            "source": {
+                "type": "git",
+                "url": "https://lab.civicrm.org/extensions/form-processor.git",
+                "reference": "ba3b39e17785e911185d5e61e094e13439f91480"
+            },
+            "type": "civicrm-ext",
+            "description": "Form Processor",
+            "time": "2026-07-22T09:49:08+00:00"
         },
         {
             "name": "civicrm/gitignore",
