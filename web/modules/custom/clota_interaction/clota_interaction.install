@@ -1,0 +1,150 @@
+<?php
+
+use Drupal\block\Entity\Block;
+
+/**
+ * Implements hook_install().
+ */
+function clota_interaction_install(): void {
+  _clota_interaction_ensure_block();
+}
+
+/**
+ * Places the interactions block on existing installations.
+ */
+function clota_interaction_update_11001(): void {
+  _clota_interaction_ensure_block();
+}
+
+/**
+ * Translates the Clota interface and CiviCRM labels into Catalan.
+ */
+function clota_interaction_update_11002(): void {
+  _clota_interaction_ensure_block();
+
+  $block = Block::load('clota_interactions');
+  $settings = $block->get('settings');
+  $settings['label'] = 'Les meves interaccions';
+  $block->set('settings', $settings)->save();
+
+  $role = \Drupal\user\Entity\Role::load('usuario_clota');
+  if ($role) {
+    $role->set('label', 'usuari clota')->save();
+  }
+
+  $webform = \Drupal\webform\Entity\Webform::load('interaccion_clota');
+  if ($webform) {
+    $elements = $webform->getElementsDecoded();
+    $elements['introduccion']['#text'] = 'Registra una interacció que hagis mantingut amb un altre usuari Clota.';
+    $elements['civicrm_1_contact_1_contact_existing']['#title'] = 'Usuari que registra la interacció';
+    $elements['civicrm_2_contact_1_contact_existing']['#title'] = 'Persona amb qui has interactuat';
+    $elements['civicrm_2_contact_1_contact_existing']['#search_prompt'] = '- Selecciona un altre usuari Clota -';
+    $elements['civicrm_2_contact_1_contact_existing']['#none_prompt'] = "No s'han trobat usuaris";
+    $elements['civicrm_1_activity_1_activity_activity_date_time']['#title'] = 'Data de la interacció';
+    $elements['civicrm_1_activity_1_activity_details']['#title'] = 'Notes';
+    $elements['civicrm_1_activity_1_activity_details']['#description'] = 'Descriu breument la interacció.';
+    $webform->set('title', 'Registrar interacció Clota');
+    $webform->setElements($elements);
+    $webform->setSetting('confirmation_message', "La interacció s'ha registrat correctament a CiviCRM.");
+    $webform->save();
+
+    $handler = $webform->getHandler('webform_civicrm');
+    $configuration = $handler->getConfiguration();
+    $configuration['settings']['data']['activity'][1]['activity'][1]['subject'] = 'Interacció Clota';
+    $handler->setConfiguration($configuration);
+    $webform->updateWebformHandler($handler);
+  }
+
+  \Drupal::service('civicrm')->initialize();
+  $activityType = civicrm_api3('OptionValue', 'getsingle', [
+    'option_group_id' => 'activity_type',
+    'name' => 'Interaccion_Clota',
+  ]);
+  civicrm_api3('OptionValue', 'create', [
+    'id' => $activityType['id'],
+    'label' => 'Interacció Clota',
+  ]);
+
+  foreach ([
+    'fundaciones_barcelona_importadas' => 'Fundacions de Barcelona importades',
+    'usuarios_clota' => 'Usuaris Clota',
+  ] as $name => $title) {
+    $group = civicrm_api3('Group', 'getsingle', ['name' => $name]);
+    civicrm_api3('Group', 'create', [
+      'id' => $group['id'],
+      'title' => $title,
+    ]);
+  }
+}
+
+/**
+ * Translates existing Clota contacts and activity subjects into Catalan.
+ */
+function clota_interaction_update_11003(): void {
+  \Drupal::service('civicrm')->initialize();
+
+  $group = civicrm_api3('Group', 'getsingle', ['name' => 'usuarios_clota']);
+  $memberships = civicrm_api3('GroupContact', 'get', [
+    'group_id' => $group['id'],
+    'status' => 'Added',
+    'options' => ['limit' => 0],
+  ]);
+  foreach ($memberships['values'] as $membership) {
+    civicrm_api3('Contact', 'create', [
+      'id' => $membership['contact_id'],
+      'first_name' => 'Usuari',
+    ]);
+  }
+
+  $activities = civicrm_api3('Activity', 'get', [
+    'activity_type_id' => 'Interaccion_Clota',
+    'is_deleted' => 0,
+    'options' => ['limit' => 0],
+  ]);
+  foreach ($activities['values'] as $activity) {
+    civicrm_api3('Activity', 'create', [
+      'id' => $activity['id'],
+      'subject' => 'Interacció Clota',
+    ]);
+  }
+}
+
+/**
+ * Enables weekly translation updates from Drupal's working endpoint.
+ */
+function clota_interaction_update_11004(): void {
+  \Drupal::configFactory()
+    ->getEditable('locale.settings')
+    ->set('translation.default_server_pattern', 'https://ftp.drupal.org/files/translations/all/%project/%project-%version.%language.po')
+    ->set('translation.update_interval_days', 7)
+    ->save();
+}
+
+/**
+ * Creates or updates the interactions block placement.
+ */
+function _clota_interaction_ensure_block(): void {
+  $block = Block::load('clota_interactions');
+  if (!$block) {
+    $block = Block::create([
+      'id' => 'clota_interactions',
+      'theme' => 'smallpush_ui',
+      'plugin' => 'clota_interactions',
+    ]);
+  }
+
+  $block->setRegion('content_below');
+  $block->setWeight(0);
+  $block->set('settings', [
+    'id' => 'clota_interactions',
+    'label' => 'Les meves interaccions',
+    'label_display' => TRUE,
+    'provider' => 'clota_interaction',
+  ]);
+  $block->setVisibilityConfig('request_path', [
+    'id' => 'request_path',
+    'negate' => FALSE,
+    'pages' => '/form/interaccion-clota',
+  ]);
+  $block->save();
+}

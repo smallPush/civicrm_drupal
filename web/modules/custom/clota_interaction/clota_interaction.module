@@ -1,0 +1,78 @@
+<?php
+
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
+
+/**
+ * Implements hook_menu_links_discovered_alter().
+ */
+function clota_interaction_menu_links_discovered_alter(array &$links): void {
+  unset(
+    $links['civicrm.admin_config_civicrm'],
+    $links['entity.webform.collection'],
+    $links['webform.reports_plugins'],
+  );
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter() for the user login form.
+ */
+function clota_interaction_form_user_login_form_alter(array &$form, FormStateInterface $form_state): void {
+  $form['#submit'][] = 'clota_interaction_login_submit';
+}
+
+/**
+ * Redirects Clota users to the interaction form after login.
+ */
+function clota_interaction_login_submit(array &$form, FormStateInterface $form_state): void {
+  $account = \Drupal::currentUser();
+  if (in_array('usuario_clota', $account->getRoles(), TRUE)) {
+    $form_state->setRedirectUrl(Url::fromRoute('entity.webform.canonical', [
+      'webform' => 'interaccion_clota',
+    ]));
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function clota_interaction_form_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
+  if ($form_id !== 'webform_submission_interaccion_clota_add_form') {
+    return;
+  }
+
+  $form['#validate'][] = 'clota_interaction_validate';
+}
+
+/**
+ * Prevents users from recording an interaction with themselves.
+ */
+function clota_interaction_validate(array &$form, FormStateInterface $form_state): void {
+  $contact_id = _clota_interaction_current_contact_id();
+  $target_key = 'civicrm_2_contact_1_contact_existing';
+  if ($contact_id && (int) $form_state->getValue($target_key) === $contact_id) {
+    $form_state->setErrorByName($target_key, t('Selecciona un altre usuari Clota.'));
+  }
+}
+
+/**
+ * Returns the CiviCRM contact linked to the current Drupal user.
+ */
+function _clota_interaction_current_contact_id(): int {
+  $uid = (int) \Drupal::currentUser()->id();
+  if (!$uid) {
+    return 0;
+  }
+
+  \Drupal::service('civicrm')->initialize();
+  $result = civicrm_api3('UFMatch', 'get', [
+    'uf_id' => $uid,
+    'return' => ['contact_id'],
+    'options' => ['limit' => 1],
+  ]);
+  if (empty($result['values'])) {
+    return 0;
+  }
+
+  return (int) reset($result['values'])['contact_id'];
+}

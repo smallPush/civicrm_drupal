@@ -39,6 +39,17 @@ PAGE_CACHE_MAX_AGE="${DRUPAL_PAGE_CACHE_MAX_AGE:-900}"
 BOOTSTRAP_STATUS="$(drush status --field=bootstrap 2>/dev/null || true)"
 
 if [[ "$BOOTSTRAP_STATUS" != *"Successful"* ]]; then
+  EXISTING_DRUPAL_TABLES="$(
+    mariadb -h"${DB_HOST}" -P"${DB_PORT:-3306}" -u"${DB_USER}" -p"${DB_PASSWORD}" "${DB_NAME}" \
+      --batch --skip-column-names \
+      -e "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name IN ('config', 'key_value');" \
+      2>/dev/null || true
+  )"
+  if [[ "$EXISTING_DRUPAL_TABLES" != "0" ]]; then
+    echo "Drupal bootstrap failed, but the database is not confirmed empty. Refusing automatic reinstallation." >&2
+    exit 1
+  fi
+
   echo "Drupal site is not installed. Launching automatic installation with civicrm_secure profile..."
   drush site:install civicrm_secure \
     --uri="${CIVICRM_UF_BASEURL:-http://localhost:8080}" \

@@ -1,0 +1,13 @@
+name: 'Clota Interaction'
+type: module
+description: 'Validates interactions submitted through the Clota CiviCRM webform.'
+package: Custom
+core_version_requirement: ^11
+dependencies:
+  - drupal:block
+  - drupal:config_translation
+  - drupal:language
+  - drupal:locale
+  - civicrm:civicrm
+  - webform:webform
+  - webform_civicrm:webform_civicrm
