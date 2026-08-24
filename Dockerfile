@@ -102,10 +102,6 @@ COPY civicrm.settings.php /var/www/html/web/sites/default/civicrm.settings.php
 # Static endpoint for Docker/Dokploy health checks that does not depend on Drupal bootstrap.
 RUN printf 'ok\n' > /var/www/html/web/healthz
 
-# Adjust permissions
-RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html
-
 # Configure DocumentRoot to the web directory
 ENV APACHE_DOCUMENT_ROOT /var/www/html/web
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf \
@@ -118,4 +114,3 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 EXPOSE 80
 ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["apache2-foreground"]
-
