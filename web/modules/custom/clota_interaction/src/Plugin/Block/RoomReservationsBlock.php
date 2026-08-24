@@ -8,9 +8,10 @@ use Drupal\Core\Block\BlockBase;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
- * Displays all future Clota room reservations.
+ * Displays Clota room reservations in a monthly calendar.
  *
  * @Block(
  *   id = "clota_room_reservations",
@@ -25,6 +26,7 @@ final class RoomReservationsBlock extends BlockBase implements ContainerFactoryP
     $plugin_id,
     $plugin_definition,
     private readonly RoomReservationSchedule $schedule,
+    private readonly RequestStack $requestStack,
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
   }
@@ -38,6 +40,7 @@ final class RoomReservationsBlock extends BlockBase implements ContainerFactoryP
       $plugin_id,
       $plugin_definition,
       $container->get('clota_interaction.room_reservations'),
+      $container->get('request_stack'),
     );
   }
 
@@ -52,7 +55,8 @@ final class RoomReservationsBlock extends BlockBase implements ContainerFactoryP
    * {@inheritdoc}
    */
   public function build(): array {
-    return $this->schedule->buildFutureReservations();
+    $month = $this->requestStack->getCurrentRequest()?->query->get('mes');
+    return $this->schedule->buildMonthlyCalendar(is_string($month) ? $month : NULL);
   }
 
 }

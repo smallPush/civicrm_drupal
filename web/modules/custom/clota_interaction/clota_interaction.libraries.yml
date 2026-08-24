@@ -1,0 +1,4 @@
+room_calendar:
+  css:
+    component:
+      css/room-calendar.css: {}
