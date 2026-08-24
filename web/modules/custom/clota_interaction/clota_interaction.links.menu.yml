@@ -1,6 +1,15 @@
+clota_interaction.interaction:
+  title: 'Registrar interacció amb un company'
+  description: 'Registra una interacció amb un altre usuari Clota.'
+  route_name: entity.webform.canonical
+  route_parameters:
+    webform: interaccion_clota
+  menu_name: main
+  weight: 0
+
 clota_interaction.room_reservation:
-  title: 'Reserva de la sala'
+  title: 'Reservar sala'
   description: 'Consulta el calendari i reserva la sala.'
   route_name: clota_interaction.room_reservation
   menu_name: main
-  weight: 10
+  weight: 1

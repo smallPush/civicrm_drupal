@@ -50,6 +50,7 @@ function clota_interaction_schema(): array {
 function clota_interaction_install(): void {
   _clota_interaction_ensure_block();
   _clota_interaction_ensure_reservations();
+  _clota_interaction_ensure_menu();
   _clota_interaction_configure_catalan();
 }
 
@@ -179,6 +180,13 @@ function clota_interaction_update_11006(): void {
 }
 
 /**
+ * Adds the Clota user menu to the SmallPush header.
+ */
+function clota_interaction_update_11007(): void {
+  _clota_interaction_ensure_menu();
+}
+
+/**
  * Configures Catalan for the site and existing users.
  */
 function _clota_interaction_configure_catalan(): void {
@@ -243,6 +251,38 @@ function _clota_interaction_ensure_reservations(): void {
     'id' => 'request_path',
     'negate' => FALSE,
     'pages' => '/reserva-sala',
+  ]);
+  $block->save();
+}
+
+/**
+ * Places the Clota menu in the primary menu region for Clota users.
+ */
+function _clota_interaction_ensure_menu(): void {
+  $block = Block::load('smallpush_ui_clota_menu');
+  if (!$block) {
+    $block = Block::create([
+      'id' => 'smallpush_ui_clota_menu',
+      'theme' => 'smallpush_ui',
+      'plugin' => 'system_menu_block:main',
+    ]);
+  }
+
+  $block->setRegion('primary_menu');
+  $block->setWeight(0);
+  $block->set('settings', [
+    'id' => 'system_menu_block:main',
+    'label' => 'Menú Clota',
+    'label_display' => FALSE,
+    'provider' => 'system',
+    'level' => 1,
+    'depth' => 0,
+    'expand_all_items' => FALSE,
+  ]);
+  $block->setVisibilityConfig('user_role', [
+    'id' => 'user_role',
+    'negate' => FALSE,
+    'roles' => ['usuario_clota' => 'usuario_clota'],
   ]);
   $block->save();
 }
