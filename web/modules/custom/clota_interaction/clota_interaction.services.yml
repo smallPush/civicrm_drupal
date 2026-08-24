@@ -1,0 +1,7 @@
+services:
+  clota_interaction.room_reservations:
+    class: Drupal\clota_interaction\RoomReservationSchedule
+    arguments:
+      - '@database'
+      - '@entity_type.manager'
+      - '@date.formatter'

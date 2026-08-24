@@ -1,0 +1,6 @@
+clota_interaction.room_reservation:
+  title: 'Reserva de la sala'
+  description: 'Consulta el calendari i reserva la sala.'
+  route_name: clota_interaction.room_reservation
+  menu_name: main
+  weight: 10

@@ -2,12 +2,54 @@
 
 use Drupal\block\Entity\Block;
 use Drupal\language\Entity\ConfigurableLanguage;
+use Drupal\user\Entity\Role;
+
+/**
+ * Implements hook_schema().
+ */
+function clota_interaction_schema(): array {
+  return [
+    'clota_room_reservation' => [
+      'description' => 'Stores reservations for the single Clota room.',
+      'fields' => [
+        'id' => [
+          'type' => 'serial',
+          'unsigned' => TRUE,
+          'not null' => TRUE,
+        ],
+        'uid' => [
+          'type' => 'int',
+          'unsigned' => TRUE,
+          'not null' => TRUE,
+        ],
+        'start_at' => [
+          'type' => 'int',
+          'not null' => TRUE,
+        ],
+        'end_at' => [
+          'type' => 'int',
+          'not null' => TRUE,
+        ],
+        'created' => [
+          'type' => 'int',
+          'not null' => TRUE,
+        ],
+      ],
+      'primary key' => ['id'],
+      'indexes' => [
+        'reservation_interval' => ['start_at', 'end_at'],
+        'reservation_user' => ['uid'],
+      ],
+    ],
+  ];
+}
 
 /**
  * Implements hook_install().
  */
 function clota_interaction_install(): void {
   _clota_interaction_ensure_block();
+  _clota_interaction_ensure_reservations();
   _clota_interaction_configure_catalan();
 }
 
@@ -130,6 +172,13 @@ function clota_interaction_update_11005(): void {
 }
 
 /**
+ * Creates the room reservation calendar and grants Clota user access.
+ */
+function clota_interaction_update_11006(): void {
+  _clota_interaction_ensure_reservations();
+}
+
+/**
  * Configures Catalan for the site and existing users.
  */
 function _clota_interaction_configure_catalan(): void {
@@ -140,6 +189,10 @@ function _clota_interaction_configure_catalan(): void {
   \Drupal::configFactory()
     ->getEditable('system.site')
     ->set('default_langcode', 'ca')
+    ->save();
+  \Drupal::configFactory()
+    ->getEditable('system.date')
+    ->set('timezone.default', 'Europe/Madrid')
     ->save();
 
   $users = \Drupal::entityTypeManager()->getStorage('user')->loadMultiple();
@@ -153,6 +206,45 @@ function _clota_interaction_configure_catalan(): void {
 
   \Drupal::service('civicrm')->initialize();
   Civi::settings()->set('lcMessages', 'ca_ES');
+}
+
+/**
+ * Creates reservation storage, permission, and block placement.
+ */
+function _clota_interaction_ensure_reservations(): void {
+  $schema = \Drupal::database()->schema();
+  if (!$schema->tableExists('clota_room_reservation')) {
+    $definition = clota_interaction_schema()['clota_room_reservation'];
+    $schema->createTable('clota_room_reservation', $definition);
+  }
+
+  $role = Role::load('usuario_clota');
+  if ($role) {
+    $role->grantPermission('reserve clota room')->save();
+  }
+
+  $block = Block::load('clota_room_reservations');
+  if (!$block) {
+    $block = Block::create([
+      'id' => 'clota_room_reservations',
+      'theme' => 'smallpush_ui',
+      'plugin' => 'clota_room_reservations',
+    ]);
+  }
+  $block->setRegion('content_below');
+  $block->setWeight(1);
+  $block->set('settings', [
+    'id' => 'clota_room_reservations',
+    'label' => 'Calendari de reserves',
+    'label_display' => TRUE,
+    'provider' => 'clota_interaction',
+  ]);
+  $block->setVisibilityConfig('request_path', [
+    'id' => 'request_path',
+    'negate' => FALSE,
+    'pages' => '/reserva-sala',
+  ]);
+  $block->save();
 }
 
 /**

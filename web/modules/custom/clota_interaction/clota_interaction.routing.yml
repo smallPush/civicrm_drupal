@@ -1,0 +1,7 @@
+clota_interaction.room_reservation:
+  path: '/reserva-sala'
+  defaults:
+    _form: '\Drupal\clota_interaction\Form\RoomReservationForm'
+    _title: 'Reserva de la sala'
+  requirements:
+    _permission: 'reserve clota room'
