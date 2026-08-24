@@ -50,7 +50,6 @@ function clota_interaction_schema(): array {
 function clota_interaction_install(): void {
   _clota_interaction_ensure_block();
   _clota_interaction_ensure_reservations();
-  _clota_interaction_ensure_menu();
   _clota_interaction_configure_catalan();
 }
 
@@ -184,6 +183,16 @@ function clota_interaction_update_11006(): void {
  */
 function clota_interaction_update_11007(): void {
   _clota_interaction_ensure_menu();
+}
+
+/**
+ * Moves the Clota menu to page preprocessing for reliable theme rendering.
+ */
+function clota_interaction_update_11008(): void {
+  $block = Block::load('smallpush_ui_clota_menu');
+  if ($block) {
+    $block->delete();
+  }
 }
 
 /**

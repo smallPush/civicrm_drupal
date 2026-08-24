@@ -1,7 +1,34 @@
 <?php
 
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Link;
 use Drupal\Core\Url;
+
+/**
+ * Implements hook_preprocess_page().
+ */
+function clota_interaction_preprocess_page(array &$variables): void {
+  $account = \Drupal::currentUser();
+  if (!in_array('usuario_clota', $account->getRoles(), TRUE)) {
+    return;
+  }
+
+  $variables['page']['primary_menu']['clota_user_menu'] = [
+    '#theme' => 'item_list',
+    '#items' => [
+      Link::fromTextAndUrl(
+        t('Registrar interacció amb un company'),
+        Url::fromRoute('entity.webform.canonical', ['webform' => 'interaccion_clota']),
+      )->toRenderable(),
+      Link::fromTextAndUrl(
+        t('Reservar sala'),
+        Url::fromRoute('clota_interaction.room_reservation'),
+      )->toRenderable(),
+    ],
+    '#attributes' => ['class' => ['menu', 'clota-user-menu']],
+    '#cache' => ['contexts' => ['user.roles']],
+  ];
+}
 
 /**
  * Implements hook_menu_links_discovered_alter().
