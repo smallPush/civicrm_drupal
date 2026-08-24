@@ -1,12 +1,14 @@
 <?php
 
 use Drupal\block\Entity\Block;
+use Drupal\language\Entity\ConfigurableLanguage;
 
 /**
  * Implements hook_install().
  */
 function clota_interaction_install(): void {
   _clota_interaction_ensure_block();
+  _clota_interaction_configure_catalan();
 }
 
 /**
@@ -118,6 +120,39 @@ function clota_interaction_update_11004(): void {
     ->set('translation.default_server_pattern', 'https://ftp.drupal.org/files/translations/all/%project/%project-%version.%language.po')
     ->set('translation.update_interval_days', 7)
     ->save();
+}
+
+/**
+ * Configures Catalan as the default language for Drupal and CiviCRM.
+ */
+function clota_interaction_update_11005(): void {
+  _clota_interaction_configure_catalan();
+}
+
+/**
+ * Configures Catalan for the site and existing users.
+ */
+function _clota_interaction_configure_catalan(): void {
+  if (!ConfigurableLanguage::load('ca')) {
+    ConfigurableLanguage::createFromLangcode('ca')->save();
+  }
+
+  \Drupal::configFactory()
+    ->getEditable('system.site')
+    ->set('default_langcode', 'ca')
+    ->save();
+
+  $users = \Drupal::entityTypeManager()->getStorage('user')->loadMultiple();
+  foreach ($users as $user) {
+    if (!$user->isAnonymous()) {
+      $user->set('preferred_langcode', 'ca');
+      $user->set('preferred_admin_langcode', 'ca');
+      $user->save();
+    }
+  }
+
+  \Drupal::service('civicrm')->initialize();
+  Civi::settings()->set('lcMessages', 'ca_ES');
 }
 
 /**

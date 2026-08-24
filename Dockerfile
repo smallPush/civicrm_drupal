@@ -94,6 +94,14 @@ RUN --mount=type=secret,id=github_token,required=true \
     && composer config allow-plugins.phpstan/extension-installer true \
     && composer install --no-dev --no-interaction --optimize-autoloader 
 
+# Install the official translations matching the installed CiviCRM version.
+RUN CIVICRM_VERSION="$(composer show civicrm/civicrm-core --format=json | php -r '$data = json_decode(stream_get_contents(STDIN), true); echo $data["versions"][0];')" \
+    && curl -fsSL "https://download.civicrm.org/civicrm-${CIVICRM_VERSION}-l10n.tar.gz" \
+      | tar -xz --strip-components=1 -C vendor/civicrm/civicrm-core \
+        civicrm/l10n \
+        civicrm/sql/civicrm_data.ca_ES.mysql \
+        civicrm/sql/civicrm_acl.ca_ES.mysql
+
 # Copy application files
 COPY . .
 # Add default settings
