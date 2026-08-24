@@ -56,9 +56,9 @@ final class RoomReservationSchedule {
     foreach ($reservations as $reservation) {
       $uid = (int) $reservation->uid;
       $rows[] = [
-        $this->dateFormatter->format((int) $reservation->start_at, 'custom', 'd/m/Y'),
-        $this->dateFormatter->format((int) $reservation->start_at, 'custom', 'H:i') . ' - ' .
-          $this->dateFormatter->format((int) $reservation->end_at, 'custom', 'H:i'),
+        $this->dateFormatter->format((int) $reservation->start_at, 'custom', 'd/m/Y', 'Europe/Madrid'),
+        $this->dateFormatter->format((int) $reservation->start_at, 'custom', 'H:i', 'Europe/Madrid') . ' - ' .
+          $this->dateFormatter->format((int) $reservation->end_at, 'custom', 'H:i', 'Europe/Madrid'),
         isset($users[$uid]) ? $users[$uid]->getDisplayName() : $this->t('Usuari eliminat'),
       ];
     }

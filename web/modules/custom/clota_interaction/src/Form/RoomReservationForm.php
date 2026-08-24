@@ -166,9 +166,9 @@ final class RoomReservationForm extends FormBase {
     }
 
     $this->messenger()->addStatus($this->t('Sala reservada el @date de @start a @end.', [
-      '@date' => $this->dateFormatter->format($start, 'custom', 'd/m/Y'),
-      '@start' => $this->dateFormatter->format($start, 'custom', 'H:i'),
-      '@end' => $this->dateFormatter->format($end, 'custom', 'H:i'),
+      '@date' => $this->dateFormatter->format($start, 'custom', 'd/m/Y', 'Europe/Madrid'),
+      '@start' => $this->dateFormatter->format($start, 'custom', 'H:i', 'Europe/Madrid'),
+      '@end' => $this->dateFormatter->format($end, 'custom', 'H:i', 'Europe/Madrid'),
     ]));
     $form_state->setRedirect('clota_interaction.room_reservation');
   }

@@ -217,6 +217,7 @@ function _clota_interaction_configure_catalan(): void {
     if (!$user->isAnonymous()) {
       $user->set('preferred_langcode', 'ca');
       $user->set('preferred_admin_langcode', 'ca');
+      $user->set('timezone', 'Europe/Madrid');
       $user->save();
     }
   }
