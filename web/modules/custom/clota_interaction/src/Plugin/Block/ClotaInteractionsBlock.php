@@ -7,7 +7,7 @@ use Drupal\Core\Block\BlockBase;
 use Drupal\Core\Session\AccountInterface;
 
 /**
- * Displays the current Clota user's CiviCRM interactions.
+ * Displays the current Clota user's CiviCRM activity history.
  *
  * @Block(
  *   id = "clota_interactions",
@@ -43,13 +43,29 @@ final class ClotaInteractionsBlock extends BlockBase {
     }
 
     $contactId = (string) reset($match['values'])['contact_id'];
+    $types = civicrm_api3('OptionValue', 'get', [
+      'option_group_id' => 'activity_type',
+      'name' => ['IN' => ['Interaccion_Clota', 'Reserva_Sala']],
+      'return' => ['id', 'name'],
+      'options' => ['limit' => 0],
+    ]);
+    $typeNames = [];
+    foreach ($types['values'] as $type) {
+      $typeNames[(int) $type['id']] = $type['name'];
+    }
+    if (!$typeNames) {
+      return $this->emptyState();
+    }
+
     $result = civicrm_api3('Activity', 'get', [
       'contact_id' => $contactId,
-      'activity_type_id' => 'Interaccion_Clota',
+      'activity_type_id' => ['IN' => array_keys($typeNames)],
       'is_deleted' => 0,
       'sequential' => 1,
       'return' => [
         'id',
+        'activity_type_id',
+        'subject',
         'activity_date_time',
         'details',
         'status_id',
@@ -69,7 +85,11 @@ final class ClotaInteractionsBlock extends BlockBase {
 
     $rows = [];
     foreach ($result['values'] as $activity) {
-      if ((string) $activity['source_contact_id'] === $contactId) {
+      $isReservation = ($typeNames[(int) $activity['activity_type_id']] ?? '') === 'Reserva_Sala';
+      if ($isReservation) {
+        $people = [];
+      }
+      elseif ((string) $activity['source_contact_id'] === $contactId) {
         $people = array_values($activity['target_contact_name'] ?? []);
       }
       else {
@@ -77,6 +97,7 @@ final class ClotaInteractionsBlock extends BlockBase {
       }
 
       $rows[] = [
+        'type' => $isReservation ? $this->t('Reserva de sala') : $this->t('Interacció'),
         'date' => \Drupal::service('date.formatter')->format(
           strtotime($activity['activity_date_time']),
           'custom',
@@ -93,13 +114,14 @@ final class ClotaInteractionsBlock extends BlockBase {
     return [
       '#type' => 'table',
       '#header' => [
+        $this->t('Activitat'),
         $this->t('Date'),
         $this->t('Persona'),
         $this->t('Notes'),
         $this->t('Estat'),
       ],
       '#rows' => $rows,
-      '#empty' => $this->t('Encara no tens interaccions registrades.'),
+      '#empty' => $this->t('Encara no tens activitat registrada.'),
       '#cache' => [
         'contexts' => ['user'],
         'max-age' => 0,
@@ -108,11 +130,11 @@ final class ClotaInteractionsBlock extends BlockBase {
   }
 
   /**
-   * Returns the empty state for users without interactions.
+   * Returns the empty state for users without activity.
    */
   private function emptyState(): array {
     return [
-      '#markup' => '<p>' . $this->t('Encara no tens interaccions registrades.') . '</p>',
+      '#markup' => '<p>' . $this->t('Encara no tens activitat registrada.') . '</p>',
       '#cache' => [
         'contexts' => ['user'],
         'max-age' => 0,

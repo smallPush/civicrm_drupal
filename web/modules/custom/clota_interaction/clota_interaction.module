@@ -107,3 +107,35 @@ function _clota_interaction_current_contact_id(): int {
 
   return (int) reset($result['values'])['contact_id'];
 }
+
+/**
+ * Creates a CiviCRM activity for a room reservation.
+ */
+function _clota_interaction_create_reservation_activity(int $uid, int $start, int $end): int {
+  \Drupal::service('civicrm')->initialize();
+  $match = civicrm_api3('UFMatch', 'getsingle', [
+    'uf_id' => $uid,
+    'return' => ['contact_id'],
+  ]);
+  $contact_id = (int) ($match['contact_id'] ?? 0);
+  if (!$contact_id) {
+    throw new \RuntimeException("Drupal user $uid is not linked to a CiviCRM contact.");
+  }
+
+  $formatter = \Drupal::service('date.formatter');
+  $date = $formatter->format($start, 'custom', 'd/m/Y', 'Europe/Madrid');
+  $start_time = $formatter->format($start, 'custom', 'H:i', 'Europe/Madrid');
+  $end_time = $formatter->format($end, 'custom', 'H:i', 'Europe/Madrid');
+  $activity = civicrm_api3('Activity', 'create', [
+    'activity_type_id' => 'Reserva_Sala',
+    'subject' => 'Reserva de sala',
+    'activity_date_time' => $formatter->format($start, 'custom', 'Y-m-d H:i:s', 'Europe/Madrid'),
+    'status_id' => 'Scheduled',
+    'source_contact_id' => $contact_id,
+    'target_contact_id' => [$contact_id],
+    'details' => "Reserva de sala el $date de $start_time a $end_time.",
+    'check_permissions' => FALSE,
+  ]);
+
+  return (int) $activity['id'];
+}

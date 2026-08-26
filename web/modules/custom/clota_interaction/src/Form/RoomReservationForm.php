@@ -140,6 +140,7 @@ final class RoomReservationForm extends FormBase {
     $start = (int) $form_state->get('reservation_start');
     $end = (int) $form_state->get('reservation_end');
     $lockName = 'clota_room_reservation_write';
+    $activityId = 0;
 
     if (!$this->lock->acquire($lockName, 10.0)) {
       $this->messenger()->addError($this->t('Una altra reserva s’està processant. Torna-ho a provar.'));
@@ -152,14 +153,38 @@ final class RoomReservationForm extends FormBase {
         return;
       }
 
+      $activityId = \_clota_interaction_create_reservation_activity(
+        (int) $this->currentUser->id(),
+        $start,
+        $end,
+      );
       $this->database->insert('clota_room_reservation')
         ->fields([
           'uid' => (int) $this->currentUser->id(),
           'start_at' => $start,
           'end_at' => $end,
           'created' => \Drupal::time()->getRequestTime(),
+          'civicrm_activity_id' => $activityId,
         ])
         ->execute();
+    }
+    catch (\Throwable $exception) {
+      if ($activityId) {
+        try {
+          civicrm_api3('Activity', 'delete', ['id' => $activityId]);
+        }
+        catch (\Throwable $cleanupException) {
+          $this->getLogger('clota_interaction')->warning('Could not remove orphan CiviCRM activity @id: @message', [
+            '@id' => $activityId,
+            '@message' => $cleanupException->getMessage(),
+          ]);
+        }
+      }
+      $this->getLogger('clota_interaction')->error('Room reservation failed: @message', [
+        '@message' => $exception->getMessage(),
+      ]);
+      $this->messenger()->addError($this->t("No s'ha pogut registrar la reserva a CiviCRM. Torna-ho a provar."));
+      return;
     }
     finally {
       $this->lock->release($lockName);

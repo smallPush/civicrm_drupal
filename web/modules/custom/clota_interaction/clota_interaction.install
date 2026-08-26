@@ -34,11 +34,17 @@ function clota_interaction_schema(): array {
           'type' => 'int',
           'not null' => TRUE,
         ],
+        'civicrm_activity_id' => [
+          'type' => 'int',
+          'unsigned' => TRUE,
+          'not null' => FALSE,
+        ],
       ],
       'primary key' => ['id'],
       'indexes' => [
         'reservation_interval' => ['start_at', 'end_at'],
         'reservation_user' => ['uid'],
+        'reservation_activity' => ['civicrm_activity_id'],
       ],
     ],
   ];
@@ -51,6 +57,7 @@ function clota_interaction_install(): void {
   _clota_interaction_ensure_block();
   _clota_interaction_ensure_reservations();
   _clota_interaction_configure_catalan();
+  _clota_interaction_ensure_reservation_activity_type();
 }
 
 /**
@@ -196,6 +203,62 @@ function clota_interaction_update_11008(): void {
 }
 
 /**
+ * Adds room reservations to the shared CiviCRM activity history.
+ */
+function clota_interaction_update_11009(): void {
+  _clota_interaction_ensure_reservation_activity_type();
+  $schema = \Drupal::database()->schema();
+  if (!$schema->fieldExists('clota_room_reservation', 'civicrm_activity_id')) {
+    $schema->addField('clota_room_reservation', 'civicrm_activity_id', [
+      'type' => 'int',
+      'unsigned' => TRUE,
+      'not null' => FALSE,
+    ]);
+    $schema->addIndex('clota_room_reservation', 'reservation_activity', ['civicrm_activity_id']);
+  }
+
+  $reservations = \Drupal::database()->select('clota_room_reservation', 'r')
+    ->fields('r', ['id', 'uid', 'start_at', 'end_at'])
+    ->isNull('civicrm_activity_id')
+    ->execute()
+    ->fetchAll();
+  foreach ($reservations as $reservation) {
+    $activity_id = _clota_interaction_create_reservation_activity(
+      (int) $reservation->uid,
+      (int) $reservation->start_at,
+      (int) $reservation->end_at,
+    );
+    \Drupal::database()->update('clota_room_reservation')
+      ->fields(['civicrm_activity_id' => $activity_id])
+      ->condition('id', (int) $reservation->id)
+      ->execute();
+  }
+
+  _clota_interaction_ensure_block();
+}
+
+/**
+ * Creates the CiviCRM activity type used for room reservations.
+ */
+function _clota_interaction_ensure_reservation_activity_type(): void {
+  \Drupal::service('civicrm')->initialize();
+  $existing = civicrm_api3('OptionValue', 'get', [
+    'option_group_id' => 'activity_type',
+    'name' => 'Reserva_Sala',
+    'return' => ['id'],
+    'options' => ['limit' => 1],
+  ]);
+  if (empty($existing['values'])) {
+    civicrm_api3('OptionValue', 'create', [
+      'option_group_id' => 'activity_type',
+      'name' => 'Reserva_Sala',
+      'label' => 'Reserva de sala',
+      'is_active' => 1,
+    ]);
+  }
+}
+
+/**
  * Configures Catalan for the site and existing users.
  */
 function _clota_interaction_configure_catalan(): void {
@@ -314,14 +377,14 @@ function _clota_interaction_ensure_block(): void {
   $block->setWeight(0);
   $block->set('settings', [
     'id' => 'clota_interactions',
-    'label' => 'Les meves interaccions',
+    'label' => 'El meu historial',
     'label_display' => TRUE,
     'provider' => 'clota_interaction',
   ]);
   $block->setVisibilityConfig('request_path', [
     'id' => 'request_path',
     'negate' => FALSE,
-    'pages' => '/form/interaccion-clota',
+    'pages' => "/form/interaccion-clota\n/reserva-sala",
   ]);
   $block->save();
 }
