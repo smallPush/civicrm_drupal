@@ -27,6 +27,11 @@ RUN a2enmod rewrite expires headers \
 
 # Configure Apache static asset caching headers
 RUN { \
+    echo 'ServerTokens Prod'; \
+    echo 'ServerSignature Off'; \
+    echo '<IfModule mod_headers.c>'; \
+    echo '  Header always unset X-Powered-By'; \
+    echo '</IfModule>'; \
     echo '<IfModule mod_expires.c>'; \
     echo '  ExpiresActive On'; \
     echo '  ExpiresDefault "access plus 1 hour"'; \
@@ -59,7 +64,12 @@ RUN { \
 COPY --from=composer:2.7 /usr/bin/composer /usr/local/bin/composer
 
 # Set default PHP memory limit and OPcache production settings
-RUN echo 'memory_limit = 512M' > /usr/local/etc/php/conf.d/memory-limit.ini \
+RUN { \
+        echo 'memory_limit = 512M'; \
+        echo 'expose_php = Off'; \
+        echo 'display_errors = Off'; \
+        echo 'log_errors = On'; \
+    } > /usr/local/etc/php/conf.d/production.ini \
     && { \
         echo '[opcache]'; \
         echo 'opcache.enable = 1'; \
