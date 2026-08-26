@@ -2,7 +2,6 @@
 
 namespace Drupal\clota_interaction\Form;
 
-use Drupal\clota_interaction\RoomReservationSchedule;
 use Drupal\Core\Database\Connection;
 use Drupal\Core\Datetime\DateFormatterInterface;
 use Drupal\Core\Form\FormBase;
@@ -24,7 +23,6 @@ final class RoomReservationForm extends FormBase {
     private readonly LockBackendInterface $lock,
     private readonly AccountProxyInterface $currentUser,
     private readonly DateFormatterInterface $dateFormatter,
-    private readonly RoomReservationSchedule $schedule,
   ) {}
 
   /**
@@ -36,7 +34,6 @@ final class RoomReservationForm extends FormBase {
       $container->get('lock'),
       $container->get('current_user'),
       $container->get('date.formatter'),
-      $container->get('clota_interaction.room_reservations'),
     );
   }
 
@@ -178,7 +175,7 @@ final class RoomReservationForm extends FormBase {
       $form_state->setErrorByName('date', $this->t('La reserva ha de començar en el futur.'));
       return;
     }
-    if ($this->schedule->hasOverlap($start, $end, $room)) {
+    if (\Drupal::service('clota_interaction.room_reservations')->hasOverlap($start, $end, $room)) {
       $form_state->setErrorByName('start_time', $this->t('Aquest interval ja està reservat. Tria una altra hora.'));
       return;
     }
@@ -207,7 +204,7 @@ final class RoomReservationForm extends FormBase {
     }
 
     try {
-      if ($this->schedule->hasOverlap($start, $end, $room)) {
+      if (\Drupal::service('clota_interaction.room_reservations')->hasOverlap($start, $end, $room)) {
         $this->messenger()->addError($this->t('Aquest interval acaba de ser reservat. Tria una altra hora.'));
         return;
       }
