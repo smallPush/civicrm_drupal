@@ -214,7 +214,14 @@ function clota_interaction_update_11009(): void {
       'unsigned' => TRUE,
       'not null' => FALSE,
     ]);
-    $schema->addIndex('clota_room_reservation', 'reservation_activity', ['civicrm_activity_id']);
+  }
+  if (!$schema->indexExists('clota_room_reservation', 'reservation_activity')) {
+    $schema->addIndex(
+      'clota_room_reservation',
+      'reservation_activity',
+      ['civicrm_activity_id'],
+      clota_interaction_schema()['clota_room_reservation'],
+    );
   }
 
   $reservations = \Drupal::database()->select('clota_room_reservation', 'r')
