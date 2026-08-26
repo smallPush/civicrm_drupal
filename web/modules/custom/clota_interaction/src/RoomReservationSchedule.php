@@ -26,9 +26,10 @@ final class RoomReservationSchedule {
   /**
    * Returns whether a reservation overlaps an existing reservation.
    */
-  public function hasOverlap(int $start, int $end): bool {
+  public function hasOverlap(int $start, int $end, string $room): bool {
     return (bool) $this->database->select('clota_room_reservation', 'r')
       ->fields('r', ['id'])
+      ->condition('room', $room)
       ->condition('start_at', $end, '<')
       ->condition('end_at', $start, '>')
       ->range(0, 1)
@@ -52,7 +53,7 @@ final class RoomReservationSchedule {
 
     $nextMonth = $month->modify('first day of next month');
     $reservations = $this->database->select('clota_room_reservation', 'r')
-      ->fields('r', ['uid', 'start_at', 'end_at'])
+      ->fields('r', ['uid', 'start_at', 'end_at', 'room', 'status'])
       ->condition('start_at', $month->getTimestamp(), '>=')
       ->condition('start_at', $nextMonth->getTimestamp(), '<')
       ->orderBy('start_at')
@@ -72,6 +73,10 @@ final class RoomReservationSchedule {
       $uid = (int) $reservation->uid;
       $day = $this->dateFormatter->format((int) $reservation->start_at, 'custom', 'Y-m-d', 'Europe/Madrid');
       $events[$day][] = [
+        'room' => \_clota_interaction_room_labels()[$reservation->room] ?? $reservation->room,
+        'status' => $reservation->status === 'pending_validation'
+          ? (string) $this->t('Pendent de validar')
+          : (string) $this->t('Confirmada'),
         'time' => $this->dateFormatter->format((int) $reservation->start_at, 'custom', 'H:i', 'Europe/Madrid') . ' - ' .
           $this->dateFormatter->format((int) $reservation->end_at, 'custom', 'H:i', 'Europe/Madrid'),
         'user' => isset($users[$uid]) ? $users[$uid]->getDisplayName() : (string) $this->t('Usuari eliminat'),
@@ -105,6 +110,12 @@ final class RoomReservationSchedule {
           $content['events']['event_' . $index] = [
             '#type' => 'container',
             '#attributes' => ['class' => ['clota-calendar__event']],
+            'room' => [
+              '#type' => 'html_tag',
+              '#tag' => 'strong',
+              '#value' => Html::escape($event['room']),
+              '#attributes' => ['class' => ['clota-calendar__event-room']],
+            ],
             'time' => [
               '#type' => 'html_tag',
               '#tag' => 'span',
@@ -116,6 +127,12 @@ final class RoomReservationSchedule {
               '#tag' => 'span',
               '#value' => Html::escape($event['user']),
               '#attributes' => ['class' => ['clota-calendar__event-user']],
+            ],
+            'status' => [
+              '#type' => 'html_tag',
+              '#tag' => 'span',
+              '#value' => Html::escape($event['status']),
+              '#attributes' => ['class' => ['clota-calendar__event-status']],
             ],
           ];
         }

@@ -127,6 +127,15 @@
   font-weight: 800;
 }
 
+.clota-calendar__event-room,
+.clota-calendar__event-status {
+  font-size: var(--sp-size-xs, 0.8rem);
+}
+
+.clota-calendar__event-status {
+  color: var(--sp-color-ink-soft, #3d4b47);
+}
+
 .clota-calendar__event-user {
   overflow: hidden;
   font-size: var(--sp-size-xs, 0.8rem);

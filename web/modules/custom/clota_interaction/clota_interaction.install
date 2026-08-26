@@ -10,7 +10,7 @@ use Drupal\user\Entity\Role;
 function clota_interaction_schema(): array {
   return [
     'clota_room_reservation' => [
-      'description' => 'Stores reservations for the single Clota room.',
+      'description' => 'Stores reservations for Clota rooms.',
       'fields' => [
         'id' => [
           'type' => 'serial',
@@ -39,12 +39,36 @@ function clota_interaction_schema(): array {
           'unsigned' => TRUE,
           'not null' => FALSE,
         ],
+        'room' => [
+          'type' => 'varchar',
+          'length' => 32,
+          'not null' => TRUE,
+          'default' => 'clota',
+        ],
+        'status' => [
+          'type' => 'varchar',
+          'length' => 32,
+          'not null' => TRUE,
+          'default' => 'confirmed',
+        ],
+        'attendees' => [
+          'type' => 'int',
+          'unsigned' => TRUE,
+          'not null' => FALSE,
+        ],
+        'needs_tv' => [
+          'type' => 'int',
+          'size' => 'tiny',
+          'unsigned' => TRUE,
+          'not null' => FALSE,
+        ],
       ],
       'primary key' => ['id'],
       'indexes' => [
         'reservation_interval' => ['start_at', 'end_at'],
         'reservation_user' => ['uid'],
         'reservation_activity' => ['civicrm_activity_id'],
+        'reservation_room_interval' => ['room', 'start_at', 'end_at'],
       ],
     ],
   ];
@@ -58,6 +82,7 @@ function clota_interaction_install(): void {
   _clota_interaction_ensure_reservations();
   _clota_interaction_configure_catalan();
   _clota_interaction_ensure_reservation_activity_type();
+  _clota_interaction_ensure_reservation_civicrm_config();
 }
 
 /**
@@ -207,6 +232,7 @@ function clota_interaction_update_11008(): void {
  */
 function clota_interaction_update_11009(): void {
   _clota_interaction_ensure_reservation_activity_type();
+  _clota_interaction_ensure_reservation_civicrm_config();
   $schema = \Drupal::database()->schema();
   if (!$schema->fieldExists('clota_room_reservation', 'civicrm_activity_id')) {
     $schema->addField('clota_room_reservation', 'civicrm_activity_id', [
@@ -245,6 +271,46 @@ function clota_interaction_update_11009(): void {
 }
 
 /**
+ * Adds multiple rooms and external-room approval metadata.
+ */
+function clota_interaction_update_11010(): void {
+  $schema = \Drupal::database()->schema();
+  $definition = clota_interaction_schema()['clota_room_reservation'];
+  foreach (['room', 'status', 'attendees', 'needs_tv'] as $field) {
+    if (!$schema->fieldExists('clota_room_reservation', $field)) {
+      $schema->addField('clota_room_reservation', $field, $definition['fields'][$field]);
+    }
+  }
+  if (!$schema->indexExists('clota_room_reservation', 'reservation_room_interval')) {
+    $schema->addIndex(
+      'clota_room_reservation',
+      'reservation_room_interval',
+      ['room', 'start_at', 'end_at'],
+      $definition,
+    );
+  }
+
+  _clota_interaction_ensure_reservation_civicrm_config();
+  $fields = _clota_interaction_reservation_custom_fields();
+  $reservations = \Drupal::database()->select('clota_room_reservation', 'r')
+    ->fields('r', ['civicrm_activity_id', 'room', 'status'])
+    ->isNotNull('civicrm_activity_id')
+    ->execute()
+    ->fetchAll();
+  foreach ($reservations as $reservation) {
+    $room_label = _clota_interaction_room_labels()[$reservation->room] ?? $reservation->room;
+    civicrm_api3('Activity', 'create', [
+      'id' => (int) $reservation->civicrm_activity_id,
+      $fields['Sala_Clota'] => $room_label,
+      $fields['Estat_Reserva'] => $reservation->status === 'pending_validation'
+        ? 'Pendent de validar per Administració de la Clota'
+        : 'Confirmada',
+      'check_permissions' => FALSE,
+    ]);
+  }
+}
+
+/**
  * Creates the CiviCRM activity type used for room reservations.
  */
 function _clota_interaction_ensure_reservation_activity_type(): void {
@@ -262,6 +328,69 @@ function _clota_interaction_ensure_reservation_activity_type(): void {
       'label' => 'Reserva de sala',
       'is_active' => 1,
     ]);
+  }
+}
+
+/**
+ * Creates the CiviCRM approval status and structured reservation fields.
+ */
+function _clota_interaction_ensure_reservation_civicrm_config(): void {
+  \Drupal::service('civicrm')->initialize();
+  $status = civicrm_api3('OptionValue', 'get', [
+    'option_group_id' => 'activity_status',
+    'name' => 'Pending_Clota_Approval',
+    'return' => ['id'],
+    'options' => ['limit' => 1],
+  ]);
+  if (empty($status['values'])) {
+    civicrm_api3('OptionValue', 'create', [
+      'option_group_id' => 'activity_status',
+      'name' => 'Pending_Clota_Approval',
+      'label' => 'Pendent de validar per Administració de la Clota',
+      'is_active' => 1,
+    ]);
+  }
+
+  $groups = civicrm_api3('CustomGroup', 'get', [
+    'name' => 'Clota_Room_Reservation',
+    'return' => ['id'],
+    'options' => ['limit' => 1],
+  ]);
+  if (empty($groups['values'])) {
+    $group = civicrm_api3('CustomGroup', 'create', [
+      'name' => 'Clota_Room_Reservation',
+      'title' => 'Reserva de sala Clota',
+      'extends' => 'Activity',
+      'style' => 'Inline',
+      'collapse_display' => 1,
+      'is_active' => 1,
+    ]);
+    $group_id = (int) $group['id'];
+  }
+  else {
+    $group_id = (int) reset($groups['values'])['id'];
+  }
+
+  $definitions = [
+    'Sala_Clota' => ['label' => 'Sala', 'data_type' => 'String', 'html_type' => 'Text'],
+    'Nombre_Assistents' => ['label' => 'Nombre d’assistents', 'data_type' => 'Int', 'html_type' => 'Text'],
+    'Necessita_Televisio' => ['label' => 'Necessita televisió', 'data_type' => 'Boolean', 'html_type' => 'Radio'],
+    'Estat_Reserva' => ['label' => 'Estat de la reserva', 'data_type' => 'String', 'html_type' => 'Text'],
+  ];
+  foreach ($definitions as $name => $field) {
+    $existing = civicrm_api3('CustomField', 'get', [
+      'custom_group_id' => $group_id,
+      'name' => $name,
+      'return' => ['id'],
+      'options' => ['limit' => 1],
+    ]);
+    if (empty($existing['values'])) {
+      civicrm_api3('CustomField', 'create', $field + [
+        'custom_group_id' => $group_id,
+        'name' => $name,
+        'is_active' => 1,
+      ]);
+    }
   }
 }
 
