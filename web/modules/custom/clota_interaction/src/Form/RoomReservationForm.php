@@ -2,13 +2,8 @@
 
 namespace Drupal\clota_interaction\Form;
 
-use Drupal\Core\Database\Connection;
-use Drupal\Core\Datetime\DateFormatterInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Lock\LockBackendInterface;
-use Drupal\Core\Session\AccountProxyInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides the Clota room reservation form.
@@ -17,25 +12,6 @@ final class RoomReservationForm extends FormBase {
 
   private const STANDARD_DURATIONS = [15, 30, 45, 60];
   private const EXTERNAL_DURATIONS = [15, 30, 45, 60, 120, 180, 240, 300];
-
-  public function __construct(
-    private readonly Connection $database,
-    private readonly LockBackendInterface $lock,
-    private readonly AccountProxyInterface $currentUser,
-    private readonly DateFormatterInterface $dateFormatter,
-  ) {}
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container): static {
-    return new static(
-      $container->get('database'),
-      $container->get('lock'),
-      $container->get('current_user'),
-      $container->get('date.formatter'),
-    );
-  }
 
   /**
    * {@inheritdoc}
@@ -198,7 +174,8 @@ final class RoomReservationForm extends FormBase {
     $lockName = 'clota_room_reservation_write';
     $activityId = 0;
 
-    if (!$this->lock->acquire($lockName, 10.0)) {
+    $lock = \Drupal::service('lock');
+    if (!$lock->acquire($lockName, 10.0)) {
       $this->messenger()->addError($this->t('Una altra reserva s’està processant. Torna-ho a provar.'));
       return;
     }
@@ -210,7 +187,7 @@ final class RoomReservationForm extends FormBase {
       }
 
       $activityId = \_clota_interaction_create_reservation_activity(
-        (int) $this->currentUser->id(),
+        (int) \Drupal::currentUser()->id(),
         $start,
         $end,
         $room,
@@ -218,9 +195,9 @@ final class RoomReservationForm extends FormBase {
         $needsTv,
         $reservationStatus,
       );
-      $this->database->insert('clota_room_reservation')
+      \Drupal::database()->insert('clota_room_reservation')
         ->fields([
-          'uid' => (int) $this->currentUser->id(),
+          'uid' => (int) \Drupal::currentUser()->id(),
           'start_at' => $start,
           'end_at' => $end,
           'created' => \Drupal::time()->getRequestTime(),
@@ -251,14 +228,15 @@ final class RoomReservationForm extends FormBase {
       return;
     }
     finally {
-      $this->lock->release($lockName);
+      $lock->release($lockName);
     }
 
+    $dateFormatter = \Drupal::service('date.formatter');
     $replacements = [
       '@room' => \_clota_interaction_room_labels()[$room],
-      '@date' => $this->dateFormatter->format($start, 'custom', 'd/m/Y', 'Europe/Madrid'),
-      '@start' => $this->dateFormatter->format($start, 'custom', 'H:i', 'Europe/Madrid'),
-      '@end' => $this->dateFormatter->format($end, 'custom', 'H:i', 'Europe/Madrid'),
+      '@date' => $dateFormatter->format($start, 'custom', 'd/m/Y', 'Europe/Madrid'),
+      '@start' => $dateFormatter->format($start, 'custom', 'H:i', 'Europe/Madrid'),
+      '@end' => $dateFormatter->format($end, 'custom', 'H:i', 'Europe/Madrid'),
     ];
     $message = $reservationStatus === 'pending_validation'
       ? $this->t('Reserva enviada i pendent de validació administrativa: @room, @date de @start a @end.', $replacements)
