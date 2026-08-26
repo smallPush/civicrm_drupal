@@ -24,9 +24,13 @@ function clota_interaction_preprocess_page(array &$variables): void {
         t('Reservar sala'),
         Url::fromRoute('clota_interaction.room_reservation'),
       )->toRenderable(),
+      Link::fromTextAndUrl(
+        t('Tancar sessió'),
+        Url::fromRoute('user.logout'),
+      )->toRenderable(),
     ],
     '#attributes' => ['class' => ['menu', 'clota-user-menu']],
-    '#cache' => ['contexts' => ['user.roles']],
+    '#cache' => ['contexts' => ['session', 'user.roles']],
   ];
 }
 
