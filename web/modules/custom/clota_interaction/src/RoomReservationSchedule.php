@@ -71,12 +71,16 @@ final class RoomReservationSchedule {
     $events = [];
     foreach ($reservations as $reservation) {
       $uid = (int) $reservation->uid;
+      $roomKey = isset(\_clota_interaction_room_labels()[$reservation->room]) ? $reservation->room : 'clota';
+      $statusKey = $reservation->status === 'pending_validation' ? 'pending' : 'confirmed';
       $day = $this->dateFormatter->format((int) $reservation->start_at, 'custom', 'Y-m-d', 'Europe/Madrid');
       $events[$day][] = [
-        'room' => \_clota_interaction_room_labels()[$reservation->room] ?? $reservation->room,
-        'status' => $reservation->status === 'pending_validation'
+        'room' => \_clota_interaction_room_labels()[$roomKey],
+        'room_key' => $roomKey,
+        'status' => $statusKey === 'pending'
           ? (string) $this->t('Pendent de validar')
           : (string) $this->t('Confirmada'),
+        'status_key' => $statusKey,
         'time' => $this->dateFormatter->format((int) $reservation->start_at, 'custom', 'H:i', 'Europe/Madrid') . ' - ' .
           $this->dateFormatter->format((int) $reservation->end_at, 'custom', 'H:i', 'Europe/Madrid'),
         'user' => isset($users[$uid]) ? $users[$uid]->getDisplayName() : (string) $this->t('Usuari eliminat'),
@@ -109,7 +113,11 @@ final class RoomReservationSchedule {
         foreach ($events[$dateKey] as $index => $event) {
           $content['events']['event_' . $index] = [
             '#type' => 'container',
-            '#attributes' => ['class' => ['clota-calendar__event']],
+            '#attributes' => ['class' => [
+              'clota-calendar__event',
+              'clota-calendar__event--room-' . $event['room_key'],
+              'clota-calendar__event--status-' . $event['status_key'],
+            ]],
             'room' => [
               '#type' => 'html_tag',
               '#tag' => 'strong',
