@@ -46,12 +46,12 @@ final class ClotaInteractionsBlock extends BlockBase {
     $types = civicrm_api3('OptionValue', 'get', [
       'option_group_id' => 'activity_type',
       'name' => ['IN' => ['Interaccion_Clota', 'Reserva_Sala']],
-      'return' => ['id', 'name'],
+      'return' => ['value', 'name'],
       'options' => ['limit' => 0],
     ]);
     $typeNames = [];
     foreach ($types['values'] as $type) {
-      $typeNames[(int) $type['id']] = $type['name'];
+      $typeNames[(int) $type['value']] = $type['name'];
     }
     if (!$typeNames) {
       return $this->emptyState();
@@ -59,7 +59,7 @@ final class ClotaInteractionsBlock extends BlockBase {
 
     $result = civicrm_api3('Activity', 'get', [
       'contact_id' => $contactId,
-      'activity_type_id' => ['IN' => array_keys($typeNames)],
+      'activity_type_id' => ['IN' => array_values($typeNames)],
       'is_deleted' => 0,
       'sequential' => 1,
       'return' => [
