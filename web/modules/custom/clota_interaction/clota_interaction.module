@@ -25,6 +25,14 @@ function clota_interaction_preprocess_page(array &$variables): void {
         Url::fromRoute('clota_interaction.room_reservation'),
       )->toRenderable(),
       Link::fromTextAndUrl(
+        t('El meu perfil'),
+        Url::fromRoute('clota_interaction.profile'),
+      )->toRenderable(),
+      Link::fromTextAndUrl(
+        t('Directori de La Clota'),
+        Url::fromRoute('clota_interaction.directory'),
+      )->toRenderable(),
+      Link::fromTextAndUrl(
         t('Tancar sessió'),
         Url::fromRoute('user.logout'),
       )->toRenderable(),

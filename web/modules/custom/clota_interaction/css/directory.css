@@ -1,0 +1,183 @@
+.clota-directory__intro {
+  max-width: 68ch;
+  margin-bottom: 2rem;
+  font-size: 1.125rem;
+}
+
+.clota-directory-filters {
+  display: grid;
+  grid-template-columns: minmax(14rem, 2fr) minmax(12rem, 1fr) auto;
+  gap: 1rem;
+  align-items: end;
+  margin-bottom: 1.25rem;
+  padding: 1.25rem;
+  border: 1px solid color-mix(in srgb, currentColor 15%, transparent);
+  border-radius: 1rem;
+  background: color-mix(in srgb, Canvas 94%, #d9f2e6);
+}
+
+.clota-directory-filters__field label {
+  display: block;
+  margin-bottom: .4rem;
+  font-size: .875rem;
+  font-weight: 750;
+}
+
+.clota-directory-filters__field input,
+.clota-directory-filters__field select {
+  width: 100%;
+  min-height: 3rem;
+  padding: .65rem .8rem;
+  border: 1px solid color-mix(in srgb, currentColor 30%, transparent);
+  border-radius: .65rem;
+  background: Canvas;
+  color: CanvasText;
+  font: inherit;
+}
+
+.clota-directory-filters__field input:focus,
+.clota-directory-filters__field select:focus {
+  border-color: #157f62;
+  outline: .2rem solid color-mix(in srgb, #157f62 24%, transparent);
+  outline-offset: 1px;
+}
+
+.clota-directory-filters__clear {
+  min-height: 3rem;
+  padding: .65rem 1rem;
+  border: 1px solid #157f62;
+  border-radius: .65rem;
+  background: transparent;
+  color: #0c6149;
+  font: inherit;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.clota-directory-filters__clear:hover {
+  background: color-mix(in srgb, #157f62 12%, transparent);
+}
+
+.clota-directory-filters__status {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: color-mix(in srgb, currentColor 70%, transparent);
+  font-size: .9rem;
+}
+
+.clota-directory {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr));
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.clota-directory-card {
+  position: relative;
+  overflow: hidden;
+  padding: 1.5rem;
+  border: 1px solid color-mix(in srgb, currentColor 15%, transparent);
+  border-radius: 1rem;
+  background: color-mix(in srgb, Canvas 96%, #d9f2e6);
+  box-shadow: 0 .5rem 1.5rem rgb(0 0 0 / 7%);
+}
+
+.clota-directory-card::before {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 1;
+  height: .3rem;
+  background: linear-gradient(90deg, #157f62, #d59a34);
+  content: '';
+}
+
+.clota-directory-card__image {
+  display: block;
+  width: calc(100% + 3rem);
+  margin: -1.5rem -1.5rem 1.25rem;
+  aspect-ratio: 4 / 3;
+  padding: .5rem;
+  border-bottom: 1px solid color-mix(in srgb, currentColor 12%, transparent);
+  background: #fff;
+  object-fit: contain;
+}
+
+.clota-directory-card h2 {
+  margin: 0 0 .35rem;
+  font-size: 1.4rem;
+  line-height: 1.2;
+}
+
+.clota-directory-card__role,
+.clota-directory-card__members {
+  margin: .25rem 0;
+  color: color-mix(in srgb, currentColor 72%, transparent);
+}
+
+.clota-directory-card__category {
+  display: inline-block;
+  margin: .75rem 0;
+  padding: .3rem .65rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, #157f62 14%, transparent);
+  color: #0c6149;
+  font-size: .875rem;
+  font-weight: 700;
+}
+
+.clota-directory-card__description {
+  line-height: 1.55;
+}
+
+.clota-directory-card details {
+  margin-top: .8rem;
+}
+
+.clota-directory-card__social {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .45rem .8rem;
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: .9rem;
+  font-weight: 700;
+}
+
+.clota-directory-empty {
+  padding: 2rem;
+  border: 1px dashed color-mix(in srgb, currentColor 25%, transparent);
+  border-radius: 1rem;
+  text-align: center;
+}
+
+.clota-directory-empty h2 {
+  margin-top: 0;
+}
+
+.clota-directory-empty p {
+  margin-bottom: 0;
+}
+
+.clota-directory-view [hidden] {
+  display: none !important;
+}
+
+@media (max-width: 36rem) {
+  .clota-directory-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .clota-directory-filters__status {
+    grid-column: auto;
+  }
+
+  .clota-directory-card {
+    padding: 1.25rem;
+  }
+
+  .clota-directory-card__image {
+    width: calc(100% + 2.5rem);
+    margin: -1.25rem -1.25rem 1rem;
+  }
+}

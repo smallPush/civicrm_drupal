@@ -13,3 +13,17 @@ clota_interaction.room_reservation:
   route_name: clota_interaction.room_reservation
   menu_name: main
   weight: 1
+
+clota_interaction.profile:
+  title: 'El meu perfil'
+  description: 'Actualitza les teves dades del directori.'
+  route_name: clota_interaction.profile
+  menu_name: main
+  weight: 2
+
+clota_interaction.directory:
+  title: 'Directori de La Clota'
+  description: 'Consulta els membres i serveis de La Clota.'
+  route_name: clota_interaction.directory
+  menu_name: main
+  weight: 3

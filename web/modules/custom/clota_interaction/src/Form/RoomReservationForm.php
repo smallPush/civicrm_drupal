@@ -130,7 +130,7 @@ final class RoomReservationForm extends FormBase {
       return;
     }
     if ($room === 'externa' && (int) $form_state->getValue('attendees') < 1) {
-      $form_state->setErrorByName('attendees', $this->t("Indica quanta gent vindrà."));
+      $form_state->setErrorByName('attendees', $this->t('Indica quanta gent vindrà.'));
       return;
     }
 
