@@ -122,9 +122,53 @@
   line-height: 1.2;
 }
 
+.clota-calendar__event--room-clota {
+  border-left-color: #34775d;
+  background: #e4f4ec;
+}
+
+.clota-calendar__event--room-groga {
+  border-left-color: #b77900;
+  background: #fff1b8;
+}
+
+.clota-calendar__event--room-externa {
+  border-left-color: #6941c6;
+  background: #eee8ff;
+}
+
+.clota-calendar__event--status-pending {
+  outline: 2px dashed #c75b12;
+  outline-offset: -2px;
+}
+
 .clota-calendar__event-time {
   font-size: var(--sp-size-xs, 0.8rem);
   font-weight: 800;
+}
+
+.clota-calendar__event-room,
+.clota-calendar__event-status {
+  font-size: var(--sp-size-xs, 0.8rem);
+}
+
+.clota-calendar__event-status {
+  width: fit-content;
+  margin-top: 0.15rem;
+  padding: 0.12rem 0.35rem;
+  border-radius: var(--sp-radius-pill, 999px);
+  color: var(--sp-color-ink-soft, #3d4b47);
+  font-weight: 750;
+}
+
+.clota-calendar__event--status-confirmed .clota-calendar__event-status {
+  background: #ccebdc;
+  color: #225744;
+}
+
+.clota-calendar__event--status-pending .clota-calendar__event-status {
+  background: #ffe0bf;
+  color: #843908;
 }
 
 .clota-calendar__event-user {

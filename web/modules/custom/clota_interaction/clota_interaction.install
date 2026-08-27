@@ -10,7 +10,7 @@ use Drupal\user\Entity\Role;
 function clota_interaction_schema(): array {
   return [
     'clota_room_reservation' => [
-      'description' => 'Stores reservations for the single Clota room.',
+      'description' => 'Stores reservations for Clota rooms.',
       'fields' => [
         'id' => [
           'type' => 'serial',
@@ -34,11 +34,41 @@ function clota_interaction_schema(): array {
           'type' => 'int',
           'not null' => TRUE,
         ],
+        'civicrm_activity_id' => [
+          'type' => 'int',
+          'unsigned' => TRUE,
+          'not null' => FALSE,
+        ],
+        'room' => [
+          'type' => 'varchar',
+          'length' => 32,
+          'not null' => TRUE,
+          'default' => 'clota',
+        ],
+        'status' => [
+          'type' => 'varchar',
+          'length' => 32,
+          'not null' => TRUE,
+          'default' => 'confirmed',
+        ],
+        'attendees' => [
+          'type' => 'int',
+          'unsigned' => TRUE,
+          'not null' => FALSE,
+        ],
+        'needs_tv' => [
+          'type' => 'int',
+          'size' => 'tiny',
+          'unsigned' => TRUE,
+          'not null' => FALSE,
+        ],
       ],
       'primary key' => ['id'],
       'indexes' => [
         'reservation_interval' => ['start_at', 'end_at'],
         'reservation_user' => ['uid'],
+        'reservation_activity' => ['civicrm_activity_id'],
+        'reservation_room_interval' => ['room', 'start_at', 'end_at'],
       ],
     ],
   ];
@@ -51,6 +81,8 @@ function clota_interaction_install(): void {
   _clota_interaction_ensure_block();
   _clota_interaction_ensure_reservations();
   _clota_interaction_configure_catalan();
+  _clota_interaction_ensure_reservation_activity_type();
+  _clota_interaction_ensure_reservation_civicrm_config();
 }
 
 /**
@@ -196,6 +228,171 @@ function clota_interaction_update_11008(): void {
 }
 
 /**
+ * Grants access to the member profile and public directory.
+ */
+function clota_interaction_update_11011(): void {
+  $role = Role::load('usuario_clota');
+  if ($role) {
+    $role->grantPermission('edit own clota profile');
+    $role->grantPermission('view clota directory');
+    $role->save();
+  }
+
+  foreach (['anonymous', 'authenticated'] as $roleId) {
+    $publicRole = Role::load($roleId);
+    if ($publicRole) {
+      $publicRole->grantPermission('view clota directory')->save();
+    }
+  }
+}
+
+/**
+ * Restores multi-room storage and CiviCRM metadata on existing sites.
+ */
+function clota_interaction_update_11012(): void {
+  _clota_interaction_ensure_reservation_activity_type();
+  _clota_interaction_ensure_reservation_civicrm_config();
+
+  $database = \Drupal::database();
+  $schema = $database->schema();
+  $definition = clota_interaction_schema()['clota_room_reservation'];
+  foreach (['civicrm_activity_id', 'room', 'status', 'attendees', 'needs_tv'] as $field) {
+    if (!$schema->fieldExists('clota_room_reservation', $field)) {
+      $schema->addField('clota_room_reservation', $field, $definition['fields'][$field]);
+    }
+  }
+  foreach ([
+    'reservation_activity' => ['civicrm_activity_id'],
+    'reservation_room_interval' => ['room', 'start_at', 'end_at'],
+  ] as $index => $fields) {
+    if (!$schema->indexExists('clota_room_reservation', $index)) {
+      $schema->addIndex('clota_room_reservation', $index, $fields, $definition);
+    }
+  }
+
+  $custom_fields = _clota_interaction_reservation_custom_fields();
+  $reservations = $database->select('clota_room_reservation', 'r')
+    ->fields('r')
+    ->execute()
+    ->fetchAll();
+  foreach ($reservations as $reservation) {
+    $activity_id = (int) ($reservation->civicrm_activity_id ?? 0);
+    if (!$activity_id) {
+      $activity_id = _clota_interaction_create_reservation_activity(
+        (int) $reservation->uid,
+        (int) $reservation->start_at,
+        (int) $reservation->end_at,
+        (string) $reservation->room,
+        isset($reservation->attendees) ? (int) $reservation->attendees : NULL,
+        isset($reservation->needs_tv) ? (bool) $reservation->needs_tv : NULL,
+        (string) $reservation->status,
+      );
+      $database->update('clota_room_reservation')
+        ->fields(['civicrm_activity_id' => $activity_id])
+        ->condition('id', (int) $reservation->id)
+        ->execute();
+    }
+
+    $room_label = _clota_interaction_room_labels()[$reservation->room] ?? $reservation->room;
+    civicrm_api3('Activity', 'create', [
+      'id' => $activity_id,
+      $custom_fields['Sala_Clota'] => $room_label,
+      $custom_fields['Estat_Reserva'] => $reservation->status === 'pending_validation'
+        ? 'Pendent de validar per Administració de la Clota'
+        : 'Confirmada',
+      'check_permissions' => FALSE,
+    ]);
+  }
+
+  _clota_interaction_ensure_reservations();
+  _clota_interaction_ensure_block();
+}
+
+/**
+ * Creates the CiviCRM activity type used for room reservations.
+ */
+function _clota_interaction_ensure_reservation_activity_type(): void {
+  \Drupal::service('civicrm')->initialize();
+  $existing = civicrm_api3('OptionValue', 'get', [
+    'option_group_id' => 'activity_type',
+    'name' => 'Reserva_Sala',
+    'return' => ['id'],
+    'options' => ['limit' => 1],
+  ]);
+  if (empty($existing['values'])) {
+    civicrm_api3('OptionValue', 'create', [
+      'option_group_id' => 'activity_type',
+      'name' => 'Reserva_Sala',
+      'label' => 'Reserva de sala',
+      'is_active' => 1,
+    ]);
+  }
+}
+
+/**
+ * Creates the CiviCRM approval status and reservation fields.
+ */
+function _clota_interaction_ensure_reservation_civicrm_config(): void {
+  \Drupal::service('civicrm')->initialize();
+  $status = civicrm_api3('OptionValue', 'get', [
+    'option_group_id' => 'activity_status',
+    'name' => 'Pending_Clota_Approval',
+    'return' => ['id'],
+    'options' => ['limit' => 1],
+  ]);
+  if (empty($status['values'])) {
+    civicrm_api3('OptionValue', 'create', [
+      'option_group_id' => 'activity_status',
+      'name' => 'Pending_Clota_Approval',
+      'label' => 'Pendent de validar per Administració de la Clota',
+      'is_active' => 1,
+    ]);
+  }
+
+  $groups = civicrm_api3('CustomGroup', 'get', [
+    'name' => 'Clota_Room_Reservation',
+    'return' => ['id'],
+    'options' => ['limit' => 1],
+  ]);
+  if (empty($groups['values'])) {
+    $group = civicrm_api3('CustomGroup', 'create', [
+      'name' => 'Clota_Room_Reservation',
+      'title' => 'Reserva de sala Clota',
+      'extends' => 'Activity',
+      'style' => 'Inline',
+      'collapse_display' => 1,
+      'is_active' => 1,
+    ]);
+    $group_id = (int) $group['id'];
+  }
+  else {
+    $group_id = (int) reset($groups['values'])['id'];
+  }
+
+  $definitions = [
+    'Sala_Clota' => ['label' => 'Sala', 'data_type' => 'String', 'html_type' => 'Text'],
+    'Nombre_Assistents' => ['label' => 'Nombre d’assistents', 'data_type' => 'Int', 'html_type' => 'Text'],
+    'Necessita_Televisio' => ['label' => 'Necessita televisió', 'data_type' => 'Boolean', 'html_type' => 'Radio'],
+    'Estat_Reserva' => ['label' => 'Estat de la reserva', 'data_type' => 'String', 'html_type' => 'Text'],
+  ];
+  foreach ($definitions as $name => $field) {
+    $existing = civicrm_api3('CustomField', 'get', [
+      'custom_group_id' => $group_id,
+      'name' => $name,
+      'return' => ['id'],
+      'options' => ['limit' => 1],
+    ]);
+    if (empty($existing['values'])) {
+      civicrm_api3('CustomField', 'create', $field + [
+        'custom_group_id' => $group_id,
+        'name' => $name,
+        'is_active' => 1,
+      ]);
+    }
+  }
+}
+
+/**
  * Configures Catalan for the site and existing users.
  */
 function _clota_interaction_configure_catalan(): void {
@@ -314,14 +511,14 @@ function _clota_interaction_ensure_block(): void {
   $block->setWeight(0);
   $block->set('settings', [
     'id' => 'clota_interactions',
-    'label' => 'Les meves interaccions',
+    'label' => 'El meu historial',
     'label_display' => TRUE,
     'provider' => 'clota_interaction',
   ]);
   $block->setVisibilityConfig('request_path', [
     'id' => 'request_path',
     'negate' => FALSE,
-    'pages' => '/form/interaccion-clota',
+    'pages' => "/form/interaccion-clota\n/reserva-sala",
   ]);
   $block->save();
 }

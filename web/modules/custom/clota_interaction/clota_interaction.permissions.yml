@@ -1,3 +1,11 @@
 reserve clota room:
   title: 'Reserve the Clota room'
   description: 'Create room reservations and view the reservation calendar.'
+
+edit own clota profile:
+  title: 'Edit own Clota profile'
+  description: 'Edit the CiviCRM contact linked to the current Drupal user.'
+
+view clota directory:
+  title: 'View the Clota directory'
+  description: 'View the public directory of Clota members.'
