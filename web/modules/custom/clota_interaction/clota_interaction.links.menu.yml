@@ -1,0 +1,29 @@
+clota_interaction.interaction:
+  title: 'Registrar interacció amb un company'
+  description: 'Registra una interacció amb un altre usuari Clota.'
+  route_name: entity.webform.canonical
+  route_parameters:
+    webform: interaccion_clota
+  menu_name: main
+  weight: 0
+
+clota_interaction.room_reservation:
+  title: 'Reservar sala'
+  description: 'Consulta el calendari i reserva la sala.'
+  route_name: clota_interaction.room_reservation
+  menu_name: main
+  weight: 1
+
+clota_interaction.profile:
+  title: 'El meu perfil'
+  description: 'Actualitza les teves dades del directori.'
+  route_name: clota_interaction.profile
+  menu_name: main
+  weight: 2
+
+clota_interaction.directory:
+  title: 'Directori de La Clota'
+  description: 'Consulta els membres i serveis de La Clota.'
+  route_name: clota_interaction.directory
+  menu_name: main
+  weight: 3

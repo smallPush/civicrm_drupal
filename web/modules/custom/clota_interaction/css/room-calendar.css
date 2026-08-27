@@ -1,0 +1,195 @@
+.clota-calendar {
+  overflow: hidden;
+  border: 1px solid var(--sp-color-line, #cfd2c8);
+  border-radius: var(--sp-radius-md, 1rem);
+  background: var(--sp-color-surface, #fff);
+  box-shadow: var(--sp-shadow-sm, 0 4px 12px rgb(0 0 0 / 8%));
+}
+
+.clota-calendar__toolbar {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: var(--sp-space-2, 0.75rem);
+  padding: var(--sp-space-3, 1.125rem);
+  background: var(--sp-color-ink, #111816);
+  color: var(--sp-color-surface, #fff);
+}
+
+.clota-calendar__title {
+  margin: 0;
+  font-family: var(--sp-font-display, sans-serif);
+  font-size: var(--sp-size-lg, 1.4rem);
+  text-align: center;
+  text-transform: capitalize;
+}
+
+.clota-calendar__next {
+  text-align: right;
+}
+
+.clota-calendar__toolbar a {
+  display: inline-flex;
+  padding: 0.45rem 0.8rem;
+  border: 1px solid rgb(255 255 255 / 25%);
+  border-radius: var(--sp-radius-pill, 999px);
+  color: var(--sp-color-surface, #fff);
+  font-size: var(--sp-size-sm, 0.95rem);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.clota-calendar__toolbar a:hover,
+.clota-calendar__toolbar a:focus {
+  border-color: var(--sp-color-accent, #d4ff52);
+  background: var(--sp-color-accent, #d4ff52);
+  color: var(--sp-color-ink, #111816);
+}
+
+.clota-calendar__viewport {
+  overflow-x: auto;
+}
+
+.clota-calendar__grid {
+  width: 100%;
+  min-width: 52rem;
+  margin: 0;
+  border: 0;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.clota-calendar__grid th {
+  padding: 0.65rem 0.5rem;
+  border: 1px solid var(--sp-color-line, #cfd2c8);
+  background: var(--sp-color-muted, #e5e5dc);
+  color: var(--sp-color-ink-soft, #3d4b47);
+  font-size: var(--sp-size-xs, 0.8rem);
+  letter-spacing: 0.05em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.clota-calendar__grid td {
+  height: 8.5rem;
+  padding: 0;
+  border: 1px solid var(--sp-color-line, #cfd2c8);
+  vertical-align: top;
+}
+
+.clota-calendar__day {
+  height: 100%;
+  padding: 0.55rem;
+}
+
+.clota-calendar__day--empty {
+  background: color-mix(in srgb, var(--sp-color-muted, #e5e5dc) 55%, transparent);
+}
+
+.clota-calendar__day--today {
+  box-shadow: inset 0 0 0 2px var(--sp-color-violet, #7455ff);
+}
+
+.clota-calendar__day-number {
+  display: inline-grid;
+  width: 1.8rem;
+  height: 1.8rem;
+  margin-bottom: 0.35rem;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--sp-color-ink-soft, #3d4b47);
+  font-weight: 750;
+}
+
+.clota-calendar__day--today .clota-calendar__day-number {
+  background: var(--sp-color-violet, #7455ff);
+  color: #fff;
+}
+
+.clota-calendar__events {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.clota-calendar__event {
+  display: grid;
+  gap: 0.05rem;
+  padding: 0.4rem 0.45rem;
+  border-left: 4px solid var(--sp-color-accent-strong, #8db600);
+  border-radius: var(--sp-radius-sm, 0.45rem);
+  background: color-mix(in srgb, var(--sp-color-accent, #d4ff52) 28%, #fff);
+  color: var(--sp-color-ink, #111816);
+  line-height: 1.2;
+}
+
+.clota-calendar__event--room-clota {
+  border-left-color: #34775d;
+  background: #e4f4ec;
+}
+
+.clota-calendar__event--room-groga {
+  border-left-color: #b77900;
+  background: #fff1b8;
+}
+
+.clota-calendar__event--room-externa {
+  border-left-color: #6941c6;
+  background: #eee8ff;
+}
+
+.clota-calendar__event--status-pending {
+  outline: 2px dashed #c75b12;
+  outline-offset: -2px;
+}
+
+.clota-calendar__event-time {
+  font-size: var(--sp-size-xs, 0.8rem);
+  font-weight: 800;
+}
+
+.clota-calendar__event-room,
+.clota-calendar__event-status {
+  font-size: var(--sp-size-xs, 0.8rem);
+}
+
+.clota-calendar__event-status {
+  width: fit-content;
+  margin-top: 0.15rem;
+  padding: 0.12rem 0.35rem;
+  border-radius: var(--sp-radius-pill, 999px);
+  color: var(--sp-color-ink-soft, #3d4b47);
+  font-weight: 750;
+}
+
+.clota-calendar__event--status-confirmed .clota-calendar__event-status {
+  background: #ccebdc;
+  color: #225744;
+}
+
+.clota-calendar__event--status-pending .clota-calendar__event-status {
+  background: #ffe0bf;
+  color: #843908;
+}
+
+.clota-calendar__event-user {
+  overflow: hidden;
+  font-size: var(--sp-size-xs, 0.8rem);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 48rem) {
+  .clota-calendar__toolbar {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .clota-calendar__title {
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+
+  .clota-calendar__previous,
+  .clota-calendar__next {
+    grid-row: 2;
+  }
+}

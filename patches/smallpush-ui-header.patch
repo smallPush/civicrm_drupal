@@ -118,3 +118,58 @@ index 3df4bed..6f775b2 100644
    css:
      theme:
        css/tokens.css: { weight: -20 }
+diff --git a/templates/layout/page.html.twig b/templates/layout/page.html.twig
+index 387ca49..88e448f 100644
+--- a/templates/layout/page.html.twig
++++ b/templates/layout/page.html.twig
+@@ -83,7 +83,7 @@
+   <footer class="site-footer" role="contentinfo">
+     <div class="site-footer__masthead layout-container" aria-hidden="true">
+-      <span>Small ideas.</span>
+-      <strong>Real change.</strong>
++      <span>{{ 'Small ideas.'|t }}</span>
++      <strong>{{ 'Real change.'|t }}</strong>
+     </div>
+     <div class="site-footer__inner layout-container">
+       <div class="site-footer__primary">
+diff --git a/css/civicrm.css b/css/civicrm.css
+index 3bc0b41..b4af939 100644
+--- a/css/civicrm.css
++++ b/css/civicrm.css
+@@ -69,6 +69,33 @@
++/* CiviCRM contact screens need more room than regular content pages. */
++body.path-civicrm .page-main > .layout-container {
++  width: calc(100% - 2rem);
++  max-width: none;
++}
++
++body.path-civicrm .page-content,
++body.path-civicrm .region-content,
++body.path-civicrm .crm-container,
++body.path-civicrm .crm-container .crm-block,
++body.path-civicrm .crm-container .crm-form-block,
++body.path-civicrm .crm-container .crm-accordion-wrapper {
++  box-sizing: border-box;
++  min-width: 0;
++  max-width: 100%;
++}
++
++body.path-civicrm .crm-search-display-table {
++  max-width: 100%;
++  overflow-x: auto;
++  overscroll-behavior-inline: contain;
++}
++
++body.path-civicrm .crm-search-display-table > table {
++  width: max-content;
++  min-width: 100%;
++}
++
+ @media (max-width: 48rem) {
+-  .crm-container {
+-    max-width: calc(100vw - 1.25rem);
+-    overflow-x: auto;
++  body.path-civicrm .page-main > .layout-container {
++    width: calc(100% - 1.25rem);
+   }
+ }

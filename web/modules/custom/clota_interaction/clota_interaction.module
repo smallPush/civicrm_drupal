@@ -1,0 +1,218 @@
+<?php
+
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Link;
+use Drupal\Core\Url;
+
+/**
+ * Implements hook_preprocess_page().
+ */
+function clota_interaction_preprocess_page(array &$variables): void {
+  $account = \Drupal::currentUser();
+  if (!in_array('usuario_clota', $account->getRoles(), TRUE)) {
+    return;
+  }
+
+  $variables['page']['primary_menu']['clota_user_menu'] = [
+    '#theme' => 'item_list',
+    '#items' => [
+      Link::fromTextAndUrl(
+        t('Registrar interacció amb un company'),
+        Url::fromRoute('entity.webform.canonical', ['webform' => 'interaccion_clota']),
+      )->toRenderable(),
+      Link::fromTextAndUrl(
+        t('Reservar sala'),
+        Url::fromRoute('clota_interaction.room_reservation'),
+      )->toRenderable(),
+      Link::fromTextAndUrl(
+        t('El meu perfil'),
+        Url::fromRoute('clota_interaction.profile'),
+      )->toRenderable(),
+      Link::fromTextAndUrl(
+        t('Directori de La Clota'),
+        Url::fromRoute('clota_interaction.directory'),
+      )->toRenderable(),
+      Link::fromTextAndUrl(
+        t('Tancar sessió'),
+        Url::fromRoute('user.logout'),
+      )->toRenderable(),
+    ],
+    '#attributes' => ['class' => ['menu', 'clota-user-menu']],
+    '#cache' => ['contexts' => ['session', 'user.roles']],
+  ];
+}
+
+/**
+ * Implements hook_menu_links_discovered_alter().
+ */
+function clota_interaction_menu_links_discovered_alter(array &$links): void {
+  unset(
+    $links['civicrm.admin_config_civicrm'],
+    $links['entity.webform.collection'],
+    $links['webform.reports_plugins'],
+  );
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter() for the user login form.
+ */
+function clota_interaction_form_user_login_form_alter(array &$form, FormStateInterface $form_state): void {
+  $form['#submit'][] = 'clota_interaction_login_submit';
+}
+
+/**
+ * Redirects Clota users to the interaction form after login.
+ */
+function clota_interaction_login_submit(array &$form, FormStateInterface $form_state): void {
+  $account = \Drupal::currentUser();
+  if (in_array('usuario_clota', $account->getRoles(), TRUE)) {
+    $form_state->setRedirectUrl(Url::fromRoute('entity.webform.canonical', [
+      'webform' => 'interaccion_clota',
+    ]));
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function clota_interaction_form_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
+  if ($form_id !== 'webform_submission_interaccion_clota_add_form') {
+    return;
+  }
+
+  $form['#validate'][] = 'clota_interaction_validate';
+}
+
+/**
+ * Prevents users from recording an interaction with themselves.
+ */
+function clota_interaction_validate(array &$form, FormStateInterface $form_state): void {
+  $contact_id = _clota_interaction_current_contact_id();
+  $target_key = 'civicrm_2_contact_1_contact_existing';
+  if ($contact_id && (int) $form_state->getValue($target_key) === $contact_id) {
+    $form_state->setErrorByName($target_key, t('Selecciona un altre usuari Clota.'));
+  }
+}
+
+/**
+ * Returns the CiviCRM contact linked to the current Drupal user.
+ */
+function _clota_interaction_current_contact_id(): int {
+  $uid = (int) \Drupal::currentUser()->id();
+  if (!$uid) {
+    return 0;
+  }
+
+  \Drupal::service('civicrm')->initialize();
+  $result = civicrm_api3('UFMatch', 'get', [
+    'uf_id' => $uid,
+    'return' => ['contact_id'],
+    'options' => ['limit' => 1],
+  ]);
+  if (empty($result['values'])) {
+    return 0;
+  }
+
+  return (int) reset($result['values'])['contact_id'];
+}
+
+/**
+ * Creates a CiviCRM activity for a room reservation.
+ */
+function _clota_interaction_create_reservation_activity(
+  int $uid,
+  int $start,
+  int $end,
+  string $room = 'clota',
+  ?int $attendees = NULL,
+  ?bool $needs_tv = NULL,
+  string $reservation_status = 'confirmed',
+): int {
+  \Drupal::service('civicrm')->initialize();
+  $match = civicrm_api3('UFMatch', 'getsingle', [
+    'uf_id' => $uid,
+    'return' => ['contact_id'],
+  ]);
+  $contact_id = (int) ($match['contact_id'] ?? 0);
+  if (!$contact_id) {
+    throw new \RuntimeException("Drupal user $uid is not linked to a CiviCRM contact.");
+  }
+
+  $formatter = \Drupal::service('date.formatter');
+  $date = $formatter->format($start, 'custom', 'd/m/Y', 'Europe/Madrid');
+  $start_time = $formatter->format($start, 'custom', 'H:i', 'Europe/Madrid');
+  $end_time = $formatter->format($end, 'custom', 'H:i', 'Europe/Madrid');
+  $room_label = _clota_interaction_room_labels()[$room] ?? $room;
+  $status_label = $reservation_status === 'pending_validation'
+    ? 'Pendent de validar per Administració de la Clota'
+    : 'Confirmada';
+  $details = [
+    "Sala: $room_label",
+    "Data: $date de $start_time a $end_time",
+    "Estat: $status_label",
+  ];
+  if ($room === 'externa') {
+    $details[] = "Assistents: $attendees";
+    $details[] = 'Televisió: ' . ($needs_tv ? 'Sí' : 'No');
+  }
+
+  $fields = _clota_interaction_reservation_custom_fields();
+  $params = [
+    'activity_type_id' => 'Reserva_Sala',
+    'subject' => "Reserva de sala: $room_label",
+    'activity_date_time' => $formatter->format($start, 'custom', 'Y-m-d H:i:s', 'Europe/Madrid'),
+    'status_id' => $reservation_status === 'pending_validation'
+      ? 'Pending_Clota_Approval'
+      : 'Scheduled',
+    'source_contact_id' => $contact_id,
+    'target_contact_id' => [$contact_id],
+    'details' => implode("\n", $details),
+    'check_permissions' => FALSE,
+    $fields['Sala_Clota'] => $room_label,
+    $fields['Estat_Reserva'] => $status_label,
+  ];
+  if ($room === 'externa') {
+    $params[$fields['Nombre_Assistents']] = $attendees;
+    $params[$fields['Necessita_Televisio']] = $needs_tv ? 1 : 0;
+  }
+  $activity = civicrm_api3('Activity', 'create', $params);
+
+  return (int) $activity['id'];
+}
+
+/**
+ * Returns the available rooms keyed by their stored value.
+ */
+function _clota_interaction_room_labels(): array {
+  return [
+    'clota' => 'Sala Clota',
+    'groga' => 'Sala groga',
+    'externa' => 'Sala externa',
+  ];
+}
+
+/**
+ * Returns CiviCRM custom field keys for room reservation activities.
+ */
+function _clota_interaction_reservation_custom_fields(): array {
+  $group = civicrm_api3('CustomGroup', 'getsingle', [
+    'name' => 'Clota_Room_Reservation',
+    'return' => ['id'],
+  ]);
+  $result = civicrm_api3('CustomField', 'get', [
+    'custom_group_id' => $group['id'],
+    'return' => ['id', 'name'],
+    'options' => ['limit' => 0],
+  ]);
+  $fields = [];
+  foreach ($result['values'] as $field) {
+    $fields[$field['name']] = 'custom_' . $field['id'];
+  }
+  foreach (['Sala_Clota', 'Nombre_Assistents', 'Necessita_Televisio', 'Estat_Reserva'] as $required) {
+    if (empty($fields[$required])) {
+      throw new \RuntimeException("Missing CiviCRM custom field $required.");
+    }
+  }
+
+  return $fields;
+}

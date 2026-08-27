@@ -1,0 +1,23 @@
+clota_interaction.room_reservation:
+  path: '/reserva-sala'
+  defaults:
+    _form: '\Drupal\clota_interaction\Form\RoomReservationForm'
+    _title: 'Reserva de la sala'
+  requirements:
+    _permission: 'reserve clota room'
+
+clota_interaction.profile:
+  path: '/perfil-clota'
+  defaults:
+    _form: '\Drupal\clota_interaction\Form\ClotaProfileForm'
+    _title: 'El meu perfil'
+  requirements:
+    _permission: 'edit own clota profile'
+
+clota_interaction.directory:
+  path: '/directori-clota'
+  defaults:
+    _controller: '\Drupal\clota_interaction\Controller\ClotaDirectoryController::build'
+    _title: 'Directori de La Clota'
+  requirements:
+    _permission: 'view clota directory'

@@ -27,6 +27,11 @@ RUN a2enmod rewrite expires headers \
 
 # Configure Apache static asset caching headers
 RUN { \
+    echo 'ServerTokens Prod'; \
+    echo 'ServerSignature Off'; \
+    echo '<IfModule mod_headers.c>'; \
+    echo '  Header always unset X-Powered-By'; \
+    echo '</IfModule>'; \
     echo '<IfModule mod_expires.c>'; \
     echo '  ExpiresActive On'; \
     echo '  ExpiresDefault "access plus 1 hour"'; \
@@ -59,7 +64,12 @@ RUN { \
 COPY --from=composer:2.7 /usr/bin/composer /usr/local/bin/composer
 
 # Set default PHP memory limit and OPcache production settings
-RUN echo 'memory_limit = 512M' > /usr/local/etc/php/conf.d/memory-limit.ini \
+RUN { \
+        echo 'memory_limit = 512M'; \
+        echo 'expose_php = Off'; \
+        echo 'display_errors = Off'; \
+        echo 'log_errors = On'; \
+    } > /usr/local/etc/php/conf.d/production.ini \
     && { \
         echo '[opcache]'; \
         echo 'opcache.enable = 1'; \
@@ -94,6 +104,14 @@ RUN --mount=type=secret,id=github_token,required=true \
     && composer config allow-plugins.phpstan/extension-installer true \
     && composer install --no-dev --no-interaction --optimize-autoloader 
 
+# Install the official translations matching the installed CiviCRM version.
+RUN CIVICRM_VERSION="$(composer show civicrm/civicrm-core --format=json | php -r '$data = json_decode(stream_get_contents(STDIN), true); echo $data["versions"][0];')" \
+    && curl -fsSL "https://download.civicrm.org/civicrm-${CIVICRM_VERSION}-l10n.tar.gz" \
+      | tar -xz --strip-components=1 -C vendor/civicrm/civicrm-core \
+        civicrm/l10n \
+        civicrm/sql/civicrm_data.ca_ES.mysql \
+        civicrm/sql/civicrm_acl.ca_ES.mysql
+
 # Copy application files
 COPY . .
 # Add default settings
@@ -101,10 +119,6 @@ COPY settings.php /var/www/html/web/sites/default/settings.php
 COPY civicrm.settings.php /var/www/html/web/sites/default/civicrm.settings.php
 # Static endpoint for Docker/Dokploy health checks that does not depend on Drupal bootstrap.
 RUN printf 'ok\n' > /var/www/html/web/healthz
-
-# Adjust permissions
-RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html
 
 # Configure DocumentRoot to the web directory
 ENV APACHE_DOCUMENT_ROOT /var/www/html/web
@@ -118,4 +132,3 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 EXPOSE 80
 ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["apache2-foreground"]
-

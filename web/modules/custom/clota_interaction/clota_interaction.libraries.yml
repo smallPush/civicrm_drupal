@@ -1,0 +1,14 @@
+room_calendar:
+  css:
+    component:
+      css/room-calendar.css: {}
+
+directory:
+  css:
+    component:
+      css/directory.css: {}
+  js:
+    js/directory.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
