@@ -65,6 +65,8 @@ if [[ "$BOOTSTRAP_STATUS" != *"Successful"* ]]; then
   drush cr || true
 else
   echo "Drupal site is already installed."
+  echo "Applying pending database updates..."
+  drush updatedb -y
   echo "Applying performance settings to existing installation (page_cache_max_age=${PAGE_CACHE_MAX_AGE}, css/js preprocess=1)..."
   drush cset system.performance cache.page.max_age "${PAGE_CACHE_MAX_AGE}" -y || true
   drush cset system.performance css.preprocess 1 -y || true

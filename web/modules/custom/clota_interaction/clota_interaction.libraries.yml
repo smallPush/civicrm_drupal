@@ -12,3 +12,8 @@ directory:
   dependencies:
     - core/drupal
     - core/once
+
+agenda:
+  css:
+    component:
+      css/agenda.css: {}

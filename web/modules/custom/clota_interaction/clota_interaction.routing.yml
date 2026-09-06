@@ -21,3 +21,21 @@ clota_interaction.directory:
     _title: 'Directori de La Clota'
   requirements:
     _permission: 'view clota directory'
+
+clota_interaction.agenda:
+  path: '/agenda'
+  defaults:
+    _controller: '\Drupal\clota_interaction\Controller\ClotaAgendaController::build'
+    _title: 'Agenda de La Clota'
+    period: 'upcoming'
+  requirements:
+    _access: 'TRUE'
+
+clota_interaction.agenda_history:
+  path: '/agenda/historic'
+  defaults:
+    _controller: '\Drupal\clota_interaction\Controller\ClotaAgendaController::build'
+    _title: 'Històric de La Clota'
+    period: 'past'
+  requirements:
+    _access: 'TRUE'

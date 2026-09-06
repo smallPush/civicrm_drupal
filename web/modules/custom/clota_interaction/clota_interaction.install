@@ -83,6 +83,7 @@ function clota_interaction_install(): void {
   _clota_interaction_configure_catalan();
   _clota_interaction_ensure_reservation_activity_type();
   _clota_interaction_ensure_reservation_civicrm_config();
+  _clota_interaction_ensure_agenda();
 }
 
 /**
@@ -306,6 +307,215 @@ function clota_interaction_update_11012(): void {
 
   _clota_interaction_ensure_reservations();
   _clota_interaction_ensure_block();
+}
+
+/**
+ * Creates the public agenda fields, event types, and initial activities.
+ */
+function clota_interaction_update_11013(): void {
+  _clota_interaction_ensure_agenda();
+}
+
+/**
+ * Creates the CiviCRM configuration and initial events for the agenda.
+ */
+function _clota_interaction_ensure_agenda(): void {
+  \Drupal::service('civicrm')->initialize();
+
+  $groups = civicrm_api3('CustomGroup', 'get', [
+    'name' => 'Agenda_La_Clota',
+    'return' => ['id'],
+    'options' => ['limit' => 1],
+  ]);
+  if (empty($groups['values'])) {
+    $group = civicrm_api3('CustomGroup', 'create', [
+      'name' => 'Agenda_La_Clota',
+      'title' => 'Agenda de La Clota',
+      'extends' => 'Event',
+      'style' => 'Inline',
+      'is_active' => 1,
+    ]);
+    $group_id = (int) $group['id'];
+  }
+  else {
+    $group_id = (int) reset($groups['values'])['id'];
+  }
+
+  $fields = civicrm_api3('CustomField', 'get', [
+    'custom_group_id' => $group_id,
+    'name' => 'Sala_Agenda',
+    'return' => ['id'],
+    'options' => ['limit' => 1],
+  ]);
+  if (empty($fields['values'])) {
+    $field = civicrm_api3('CustomField', 'create', [
+      'custom_group_id' => $group_id,
+      'name' => 'Sala_Agenda',
+      'label' => 'Sala / ubicació',
+      'data_type' => 'String',
+      'html_type' => 'Text',
+      'is_searchable' => 1,
+      'is_active' => 1,
+    ]);
+    $room_field = 'custom_' . $field['id'];
+  }
+  else {
+    $room_field = 'custom_' . reset($fields['values'])['id'];
+  }
+
+  $type_definitions = [
+    'Clota_Networking' => 'Networking',
+    'Clota_Taller_Formacio' => 'Taller / Formació',
+    'Clota_Afterwork' => 'Afterwork',
+    'Clota_Comunitat_Esmorzar' => 'Comunitat / Esmorzar',
+    'Clota_Conferencia' => 'Conferència',
+  ];
+  $type_ids = [];
+  foreach ($type_definitions as $name => $label) {
+    $existing = civicrm_api3('OptionValue', 'get', [
+      'option_group_id' => 'event_type',
+      'name' => $name,
+      'return' => ['value'],
+      'options' => ['limit' => 1],
+    ]);
+    if (empty($existing['values'])) {
+      civicrm_api3('OptionValue', 'create', [
+        'option_group_id' => 'event_type',
+        'name' => $name,
+        'label' => $label,
+        'is_active' => 1,
+      ]);
+      $existing = civicrm_api3('OptionValue', 'get', [
+        'option_group_id' => 'event_type',
+        'name' => $name,
+        'return' => ['value'],
+        'options' => ['limit' => 1],
+      ]);
+    }
+    $type_ids[$name] = (int) reset($existing['values'])['value'];
+  }
+
+  $events = [
+    [
+      'title' => 'Esmorzar de comunitat: connexions que sumen',
+      'summary' => '<p>Esmorzar informal per conèixer projectes, necessitats i oportunitats de col·laboració dins de La Clota.</p>',
+      'description' => '<p>Comencem el dia compartint cafè, idees i noves connexions.</p><p>Cada participant disposarà d’un minut per presentar el seu projecte o explicar quin tipus de col·laboració busca.</p>',
+      'start_date' => '2026-06-18 09:00:00',
+      'end_date' => '2026-06-18 10:30:00',
+      'type' => 'Clota_Comunitat_Esmorzar',
+      'room' => 'Espai Obert',
+    ],
+    [
+      'title' => 'Taller pràctic d’IA generativa per a equips petits',
+      'summary' => '<p>Sessió aplicada per integrar eines d’intel·ligència artificial en processos quotidians.</p>',
+      'description' => '<p>Taller pràctic sobre redacció, recerca, automatització i anàlisi amb IA generativa.</p><p>Cal portar ordinador portàtil. No es requereixen coneixements tècnics previs.</p>',
+      'start_date' => '2026-07-02 17:00:00',
+      'end_date' => '2026-07-02 19:30:00',
+      'type' => 'Clota_Taller_Formacio',
+      'room' => 'Sala Polivalent',
+    ],
+    [
+      'title' => 'Pitch Lab: presenta el teu projecte en 3 minuts',
+      'summary' => '<p>Sessió de pràctica i feedback per millorar la presentació de projectes emprenedors.</p>',
+      'description' => '<p>Una trobada orientada a professionals i equips que vulguin millorar el seu pitch.</p><p>Treballarem estructura, missatge, proposta de valor i comunicació no verbal.</p>',
+      'start_date' => '2026-07-23 18:00:00',
+      'end_date' => '2026-07-23 20:00:00',
+      'type' => 'Clota_Networking',
+      'room' => 'Sala de Reunions',
+    ],
+    [
+      'title' => 'Afterwork d’estiu / Afterwork de verano',
+      'summary' => '<p>Trobada distesa a la terrassa per connectar amb professionals i projectes de l’entorn.</p>',
+      'description' => '<p>Tanquem la jornada amb conversa, música i networking informal.</p><p>L’activitat és oberta a membres de La Clota i persones convidades.</p>',
+      'start_date' => '2026-08-06 18:30:00',
+      'end_date' => '2026-08-06 21:00:00',
+      'type' => 'Clota_Afterwork',
+      'room' => 'Terrassa',
+    ],
+    [
+      'title' => 'Negocis amb impacte: de la idea a un model sostenible',
+      'summary' => '<p>Conversa sobre models de negoci que combinen viabilitat econòmica i impacte social.</p>',
+      'description' => '<p>Professionals de l’emprenedoria social compartiran experiències, errors i aprenentatges.</p><p>La sessió acabarà amb preguntes del públic i un espai de connexió.</p>',
+      'start_date' => '2026-08-27 18:00:00',
+      'end_date' => '2026-08-27 20:00:00',
+      'type' => 'Clota_Conferencia',
+      'room' => 'Sala Polivalent',
+    ],
+    [
+      'title' => 'Esmorzar de comunitat: tornem amb noves idees',
+      'summary' => '<p>Primera trobada de comunitat després de l’estiu per compartir objectius i noves iniciatives.</p>',
+      'description' => '<p>Una sessió breu i participativa per retrobar-nos i descobrir els projectes que arriben a La Clota.</p><p>Inclou cafè, esmorzar lleuger i ronda de presentacions.</p>',
+      'start_date' => '2026-09-17 09:00:00',
+      'end_date' => '2026-09-17 10:30:00',
+      'type' => 'Clota_Comunitat_Esmorzar',
+      'room' => 'Espai Obert',
+    ],
+    [
+      'title' => 'Taller de ciberseguretat per a persones autònomes',
+      'summary' => '<p>Mesures senzilles per protegir dispositius, comptes, dades de clients i còpies de seguretat.</p>',
+      'description' => '<p>Revisarem els principals riscos digitals per a professionals independents i microempreses.</p><p>La sessió inclou una llista de comprovació i exercicis pràctics. Cal portar ordinador.</p>',
+      'start_date' => '2026-10-01 16:30:00',
+      'end_date' => '2026-10-01 19:00:00',
+      'type' => 'Clota_Taller_Formacio',
+      'room' => 'Sala de Reunions',
+    ],
+    [
+      'title' => 'Speed Networking: talent, projectes i col·laboracions',
+      'summary' => '<p>Rondes de converses breus per trobar clients, proveïdors, talent o projectes compartits.</p>',
+      'description' => '<p>Una dinàmica de networking estructurada amb converses de cinc minuts.</p><p>En inscriure’t, indica què ofereixes i quin tipus de contacte estàs buscant.</p>',
+      'start_date' => '2026-10-15 18:00:00',
+      'end_date' => '2026-10-15 20:00:00',
+      'type' => 'Clota_Networking',
+      'room' => 'Sala Polivalent',
+    ],
+    [
+      'title' => 'Masterclass de finances per a projectes creatius',
+      'summary' => '<p>Com calcular preus, controlar tresoreria i prendre decisions amb indicadors senzills.</p>',
+      'description' => '<p>Masterclass dirigida a professionals creatius, cooperatives i petits equips.</p><p>Treballarem pressupostos, marge, previsió de caixa i planificació d’ingressos.</p>',
+      'start_date' => '2026-11-05 17:00:00',
+      'end_date' => '2026-11-05 19:30:00',
+      'type' => 'Clota_Conferencia',
+      'room' => 'Sala Polivalent',
+    ],
+    [
+      'title' => 'Afterwork de tardor: comunitat en obert',
+      'summary' => '<p>Trobada oberta per descobrir La Clota i connectar amb la seva comunitat professional.</p>',
+      'description' => '<p>Una tarda per conèixer membres, iniciatives i oportunitats de col·laboració.</p><p>Hi haurà una breu presentació de projectes seguida de networking informal.</p>',
+      'start_date' => '2026-11-26 18:30:00',
+      'end_date' => '2026-11-26 21:00:00',
+      'type' => 'Clota_Afterwork',
+      'room' => 'Espai Obert',
+    ],
+  ];
+
+  foreach ($events as $event) {
+    $existing = civicrm_api3('Event', 'get', [
+      'title' => $event['title'],
+      'return' => ['id'],
+      'options' => ['limit' => 1],
+      'check_permissions' => FALSE,
+    ]);
+    if (!empty($existing['values'])) {
+      continue;
+    }
+    civicrm_api3('Event', 'create', [
+      'title' => $event['title'],
+      'summary' => $event['summary'],
+      'description' => $event['description'],
+      'start_date' => $event['start_date'],
+      'end_date' => $event['end_date'],
+      'event_type_id' => $type_ids[$event['type']],
+      'is_public' => 1,
+      'is_active' => 1,
+      'is_online_registration' => 1,
+      'registration_link_text' => 'Inscriu-t’hi',
+      'is_monetary' => 0,
+      'is_show_location' => 1,
+      'default_role_id' => 1,
+      'check_permissions' => FALSE,
+      $room_field => $event['room'],
+    ]);
+  }
 }
 
 /**

@@ -27,3 +27,10 @@ clota_interaction.directory:
   route_name: clota_interaction.directory
   menu_name: main
   weight: 3
+
+clota_interaction.agenda:
+  title: 'Agenda'
+  description: 'Consulta les activitats de La Clota.'
+  route_name: clota_interaction.agenda
+  menu_name: main
+  weight: 4
