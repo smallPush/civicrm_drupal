@@ -61,7 +61,7 @@ RUN { \
 && a2enconf static-cache
 
 # Install Composer
-COPY --from=composer:2.7 /usr/bin/composer /usr/local/bin/composer
+COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
 
 # Set default PHP memory limit and OPcache production settings
 RUN { \
