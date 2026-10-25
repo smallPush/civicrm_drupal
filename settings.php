@@ -18,4 +18,4 @@ $settings['file_public_path'] = 'sites/default/files';
 $settings['file_private_path'] = 'sites/default/files/private';
 $settings['file_temp_path'] = '/tmp';
 
-$settings['config_sync_directory'] = 'sites/default/files/config_sync';
+$settings['config_sync_directory'] = __DIR__ . '/files/config_sync';

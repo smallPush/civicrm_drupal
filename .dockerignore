@@ -1,0 +1,13 @@
+.git
+.env
+.env.*
+!.env.example
+vendor
+web/core
+web/modules/contrib
+web/themes/contrib
+web/profiles/contrib
+web/libraries
+web/ext
+web/sites/*/files
+web/sites/*/settings.local.php

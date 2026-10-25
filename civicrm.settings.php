@@ -27,6 +27,12 @@ define('CIVICRM_DSN', "mysql://{$civicrm_db_user}:{$civicrm_db_password}@{$civic
 define('CIVICRM_UF_DSN', "mysql://{$civicrm_db_user}:{$civicrm_db_password}@{$civicrm_db_host}:{$civicrm_db_port}/{$civicrm_db_name}?new_link=true");
 
 define('CIVICRM_SITE_KEY', getenv('CIVICRM_SITE_KEY') ?: 'CHANGE_ME_TO_SOMETHING_SECURE');
+foreach (['CIVICRM_CRED_KEYS', 'CIVICRM_SIGN_KEYS'] as $secret_name) {
+  $secret_value = getenv($secret_name);
+  if (!defined($secret_name) && $secret_value) {
+    define($secret_name, $secret_value);
+  }
+}
 if (!defined('CIVICRM_DOMAIN_ID')) {
   define('CIVICRM_DOMAIN_ID', (int) (getenv('CIVICRM_DOMAIN_ID') ?: 1));
 }
