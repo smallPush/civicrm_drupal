@@ -1,0 +1,301 @@
+{
+  "checked_utc": "2026-10-25T12:54:39.870189+00:00",
+  "packages": [
+    "containerd.io=2.4.2-3~debian.12~bookworm",
+    "docker-buildx-plugin=0.38.1-1~debian.12~bookworm",
+    "docker-ce=5:29.9.2-1~debian.12~bookworm",
+    "docker-ce-cli=5:29.9.2-1~debian.12~bookworm",
+    "docker-ce-rootless-extras=5:29.9.2-1~debian.12~bookworm",
+    "docker-compose-plugin=5.6.1-1~debian.12~bookworm",
+    "docker-model-plugin=1.2.9-1~debian.12~bookworm"
+  ],
+  "docker": {
+    "Platform": {
+      "Name": "Docker Engine - Community"
+    },
+    "Version": "29.9.2",
+    "ApiVersion": "1.56",
+    "MinAPIVersion": "1.40",
+    "Os": "linux",
+    "Arch": "amd64",
+    "Components": [
+      {
+        "Name": "Engine",
+        "Version": "29.9.2",
+        "Details": {
+          "ApiVersion": "1.56",
+          "Arch": "amd64",
+          "BuildTime": "Tue Oct 20 18:45:02 2026",
+          "Experimental": "false",
+          "GitCommit": "0367cbe",
+          "GoVersion": "go1.26.10",
+          "KernelVersion": "6.1.0-54-amd64",
+          "MinAPIVersion": "1.40",
+          "Module": "github.com/moby/moby/v2",
+          "ModuleVersion": "v2.0.0+unknown",
+          "Os": "linux"
+        }
+      },
+      {
+        "Name": "containerd",
+        "Version": "v2.4.2",
+        "Details": {
+          "GitCommit": "b7a25261e029d68978bbf290df0a62fc819b3c51"
+        }
+      },
+      {
+        "Name": "runc",
+        "Version": "1.5.2",
+        "Details": {
+          "GitCommit": "v1.5.2-0-g29dd3dc2"
+        }
+      },
+      {
+        "Name": "docker-init",
+        "Version": "0.19.0",
+        "Details": {
+          "GitCommit": "de40ad0"
+        }
+      }
+    ],
+    "GitCommit": "0367cbe",
+    "GoVersion": "go1.26.10",
+    "KernelVersion": "6.1.0-54-amd64",
+    "BuildTime": "2026-10-20T18:45:02.000000000+00:00"
+  },
+  "services": [
+    {
+      "Name": "chain-favor-frontend-ddbdfd",
+      "Image": "chain-favor-frontend-ddbdfd:latest",
+      "Replicas": "0/0"
+    },
+    {
+      "Name": "cli-favor-chain-client-hkb15c",
+      "Image": "cli-favor-chain-client-hkb15c:latest",
+      "Replicas": "1/1"
+    },
+    {
+      "Name": "clota-mysql-koikzv",
+      "Image": "mariadb:11",
+      "Replicas": "1/1"
+    },
+    {
+      "Name": "crm-smallpush-mysql-8hq7mu",
+      "Image": "mariadb:11",
+      "Replicas": "1/1"
+    },
+    {
+      "Name": "crm-smallpush-php-server-1k3nmw",
+      "Image": "crm-smallpush-php-server-1k3nmw:latest",
+      "Replicas": "0/0"
+    },
+    {
+      "Name": "crm-smallpush-php-server-s9qmja",
+      "Image": "crm-smallpush-php-server-s9qmja:latest",
+      "Replicas": "0/0"
+    },
+    {
+      "Name": "crm-smallpush-php-server-tj5ucx",
+      "Image": "crm-smallpush-php-server-tj5ucx:latest",
+      "Replicas": "0/0"
+    },
+    {
+      "Name": "demo-mysql-ulht7i",
+      "Image": "mariadb:11",
+      "Replicas": "1/1"
+    },
+    {
+      "Name": "dokploy",
+      "Image": "dokploy/dokploy:v0.30.10",
+      "Replicas": "1/1"
+    },
+    {
+      "Name": "dokploy-postgres",
+      "Image": "postgres:16",
+      "Replicas": "1/1"
+    },
+    {
+      "Name": "dokploy-redis",
+      "Image": "redis:7",
+      "Replicas": "1/1"
+    },
+    {
+      "Name": "donesemprenedores-donesemprenedores-a5lqwb",
+      "Image": "mysql:8",
+      "Replicas": "1/1"
+    },
+    {
+      "Name": "donesemprenedores-donesemprenedores-pacj57",
+      "Image": "donesemprenedores-donesemprenedores-pacj57:latest",
+      "Replicas": "1/1"
+    },
+    {
+      "Name": "find-work-find-work-lonbji",
+      "Image": "find-work-find-work-lonbji:latest",
+      "Replicas": "0/0"
+    },
+    {
+      "Name": "inmobiliarias-front-yy7tgo",
+      "Image": "inmobiliarias-front-yy7tgo:latest",
+      "Replicas": "0/0"
+    },
+    {
+      "Name": "inmobiliarias-postgres",
+      "Image": "postgres:16-alpine",
+      "Replicas": "1/1"
+    },
+    {
+      "Name": "lead-generator-lead-x31mpz",
+      "Image": "lead-generator-lead-x31mpz:latest",
+      "Replicas": "0/0"
+    },
+    {
+      "Name": "lead-magnet-lead-magnet-ohylee",
+      "Image": "lead-magnet-lead-magnet-ohylee:latest",
+      "Replicas": "1/1"
+    },
+    {
+      "Name": "lead-magnet-leadmagnet-qzcknm",
+      "Image": "postgres:18",
+      "Replicas": "1/1"
+    },
+    {
+      "Name": "mates-clases-mates-is37p7",
+      "Image": "mates-clases-mates-is37p7:latest",
+      "Replicas": "1/1"
+    },
+    {
+      "Name": "mates-matesstaging-zcsk62",
+      "Image": "mates-matesstaging-zcsk62:latest",
+      "Replicas": "1/1"
+    },
+    {
+      "Name": "mvp-come-to-live-bcn-landing-page-kmlzyq",
+      "Image": "mvp-come-to-live-bcn-landing-page-kmlzyq:latest",
+      "Replicas": "1/1"
+    },
+    {
+      "Name": "stoic-stoic-hu5mcz",
+      "Image": "stoic-stoic-hu5mcz:latest",
+      "Replicas": "1/1"
+    },
+    {
+      "Name": "traefik",
+      "Image": "traefik:v3.7.16",
+      "Replicas": "1/1"
+    }
+  ],
+  "endpoints": {
+    "stoic.smallpush.org": {
+      "path": "/",
+      "baseline": 200,
+      "actual": "200",
+      "matches_baseline": true
+    },
+    "realstate.smallpush.org": {
+      "path": "/",
+      "baseline": 502,
+      "actual": "502",
+      "matches_baseline": true
+    },
+    "donesemprenedores.smallpush.org": {
+      "path": "/user/login",
+      "baseline": 200,
+      "actual": "200",
+      "matches_baseline": true
+    },
+    "mates.smallpush.org": {
+      "path": "/",
+      "baseline": 200,
+      "actual": "200",
+      "matches_baseline": true
+    },
+    "findwork.smallpush.org": {
+      "path": "/",
+      "baseline": 502,
+      "actual": "502",
+      "matches_baseline": true
+    },
+    "nexusspain.com": {
+      "path": "/",
+      "baseline": 200,
+      "actual": "200",
+      "matches_baseline": true
+    },
+    "matesstaging.smallpush.org": {
+      "path": "/",
+      "baseline": 200,
+      "actual": "200",
+      "matches_baseline": true
+    },
+    "local.smallpush.org": {
+      "path": "/",
+      "baseline": 502,
+      "actual": "502",
+      "matches_baseline": true
+    },
+    "clota.smallpush.org": {
+      "path": "/",
+      "baseline": 502,
+      "actual": "502",
+      "matches_baseline": true
+    },
+    "demo.smallpush.org": {
+      "path": "/",
+      "baseline": 502,
+      "actual": "502",
+      "matches_baseline": true
+    },
+    "leadmagnet.smallpush.org": {
+      "path": "/",
+      "baseline": 200,
+      "actual": "200",
+      "matches_baseline": true
+    }
+  },
+  "dokploy_health": {
+    "ok": true
+  },
+  "application": {
+    "php": "8.3.36",
+    "upload_progress": "",
+    "drupal/core": "11.4.11",
+    "drupal/webform": "6.3.1",
+    "civicrm/civicrm-core": "6.19.2",
+    "guzzlehttp/guzzle": "7.16.0",
+    "dompdf/dompdf": "v3.1.6",
+    "phpoffice/phpspreadsheet": "5.10.0",
+    "symfony/http-foundation": "v7.4.21",
+    "symfony/yaml": "v7.4.21",
+    "image_id": "sha256:1663b01622e800549ba38c035b71e026d849e897f364d51a6de09234c0b852c8",
+    "composer_lock_sha256": "3aa498e5d37ec4dc306af96b741191b5ca298d06b860080cf30d1485a6872d58",
+    "bootstrap": {
+      "drupal-version": "11.4.11",
+      "db-status": "Connected",
+      "bootstrap": "Successful"
+    },
+    "installed_audit": {
+      "advisories": [],
+      "abandoned": [],
+      "filter": []
+    },
+    "locked_audit": {
+      "advisories": [],
+      "abandoned": [],
+      "filter": []
+    }
+  },
+  "platform_images": {
+    "dokploy": "dokploy/dokploy:v0.30.10@sha256:417cb052bed87c95ab43276888329da261f360c043bb81cd4afd7a2df66c4be7",
+    "traefik": "traefik:v3.7.16@sha256:c8a121e4bb1347e8fd52657fab12f2cb70b68f8a018895e2068f92c9e519b9c2"
+  },
+  "config_sha256": {
+    "/etc/dokploy/security/php-security.ini": "32529f16924aa4b8c2f761f357cd8827b2bc75ce3944917acb26a9c9ac11cd54",
+    "/etc/dokploy/traefik/traefik.yml": "6ed8e83f6329ced9dd355949209795cdd6d17b20f63b8ae822d783c4204f47b2",
+    "/etc/systemd/system/dokploy-admin-firewall.service": "8b0b7ad03706e5b74474b64686e632126cf94810941eec1f2696a9e624f7ec07",
+    "/usr/local/lib/dokploy-admin-firewall.py": "648cdc8904122d567b4da75d6cfd94d51fccae56d75deca7fbc9b6fc771b0504"
+  },
+  "ipv4_admin_guard": true,
+  "ipv6_admin_guard": true,
+  "checks_passed": true
+}

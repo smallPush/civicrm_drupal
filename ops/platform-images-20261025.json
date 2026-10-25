@@ -1,0 +1,10 @@
+{
+  "dokploy": {
+    "previous": "dokploy/dokploy:v0.30.8",
+    "updated": "dokploy/dokploy:v0.30.10@sha256:417cb052bed87c95ab43276888329da261f360c043bb81cd4afd7a2df66c4be7"
+  },
+  "traefik": {
+    "previous": "traefik:v3.1@sha256:74d72c7a1345984f186bddbabcc462b2128d0d8054177dc84afaeac4db1f0f56",
+    "updated": "traefik:v3.7.16@sha256:c8a121e4bb1347e8fd52657fab12f2cb70b68f8a018895e2068f92c9e519b9c2"
+  }
+}
